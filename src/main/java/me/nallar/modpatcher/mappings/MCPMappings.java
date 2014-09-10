@@ -2,11 +2,11 @@ package me.nallar.modpatcher.mappings;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import me.nallar.javapatcher.Log;
 import me.nallar.javapatcher.mappings.ClassDescription;
 import me.nallar.javapatcher.mappings.FieldDescription;
 import me.nallar.javapatcher.mappings.Mappings;
 import me.nallar.javapatcher.mappings.MethodDescription;
+import me.nallar.modpatcher.Log;
 
 import java.io.*;
 import java.util.*;
@@ -68,7 +68,7 @@ public class MCPMappings extends Mappings {
 			}
 			return extendsMap;
 		} catch (ClassNotFoundException e) {
-			Log.severe("Failed to read extends mapping", e);
+			Log.error("Failed to read extends mapping", e);
 		} finally {
 			objectInputStream.close();
 		}
@@ -128,7 +128,7 @@ public class MCPMappings extends Mappings {
 				if (className == null) {
 					className = methodMatcher.group(1);
 					if (!className.contains(".")) {
-						Log.severe("Could not find " + methodMatcher.group(1));
+						Log.error("Could not find " + methodMatcher.group(1));
 						continue;
 					}
 				}
@@ -148,14 +148,14 @@ public class MCPMappings extends Mappings {
 				if (className == null) {
 					className = fieldMatcher.group(1);
 					if (!className.contains(".")) {
-						Log.severe("Could not find " + fieldMatcher.group(1));
+						Log.error("Could not find " + fieldMatcher.group(1));
 						continue;
 					}
 				}
 				FieldDescription fieldDescription = new FieldDescription(className, fieldName);
 				FieldDescription mapped = map(fieldDescription);
 				if (mapped == null) {
-					Log.severe("Could not map " + fieldName);
+					Log.error("Could not map " + fieldName);
 					fieldMatcher.appendReplacement(result, fieldName);
 				} else {
 					fieldMatcher.appendReplacement(result, mapped.name);
@@ -170,7 +170,7 @@ public class MCPMappings extends Mappings {
 			while (classMatcher.find()) {
 				String className = classStringToClassName(classMatcher.group(1));
 				if (className == null) {
-					Log.severe("Could not find " + classMatcher.group(1));
+					Log.error("Could not find " + classMatcher.group(1));
 					continue;
 				}
 				classMatcher.appendReplacement(result, className);

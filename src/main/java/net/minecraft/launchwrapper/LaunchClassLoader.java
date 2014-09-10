@@ -2,7 +2,7 @@ package net.minecraft.launchwrapper;
 
 import com.google.common.base.Joiner;
 import cpw.mods.fml.relauncher.FMLRelaunchLog;
-import me.nallar.javapatcher.Log;
+import me.nallar.modpatcher.Log;
 import me.nallar.modpatcher.PatchHook;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -53,7 +53,7 @@ public class LaunchClassLoader extends URLClassLoader {
 
 	private static Method getFindLoaded() {
 		try {
-			Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] { String.class });
+			Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[]{String.class});
 			m.setAccessible(true);
 			return m;
 		} catch (NoSuchMethodException e) {
@@ -147,6 +147,7 @@ public class LaunchClassLoader extends URLClassLoader {
 		}
 		return false;
 	}
+
 	// MP end
 	public static final int BUFFER_SIZE = 1 << 12;
 	private List<URL> sources;
@@ -158,7 +159,7 @@ public class LaunchClassLoader extends URLClassLoader {
 
 	private Set<String> classLoaderExceptions = new HashSet<String>();
 	private Set<String> transformerExceptions = new HashSet<String>();
-	private Map<String,byte[]> resourceCache = new ConcurrentHashMap<String,byte[]>(1000);
+	private Map<String, byte[]> resourceCache = new ConcurrentHashMap<String, byte[]>(1000);
 	private Set<String> negativeResourceCache = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
 	private IClassNameTransformer renameTransformer;
@@ -461,10 +462,10 @@ public class LaunchClassLoader extends URLClassLoader {
 		basicClass = PatchHook.preSrgTransformationHook(name, transformedName, basicClass);
 		if (deobfuscationTransformer == null) {
 			if (transformedName.startsWith("net.minecraft.") && !transformedName.contains("ClientBrandRetriever")) {
-				Log.severe("Transforming " + name + " before SRG transformer has been added.", new Throwable());
+				Log.error("Transforming " + name + " before SRG transformer has been added.", new Throwable());
 			}
 			if (PatchHook.requiresSrgHook(transformedName)) {
-				Log.severe("Class " + name + " must be transformed postSrg, but the SRG transformer has not been added to the classloader.", new Throwable());
+				Log.error("Class " + name + " must be transformed postSrg, but the SRG transformer has not been added to the classloader.", new Throwable());
 			}
 			for (final IClassTransformer transformer : transformers) {
 				basicClass = runTransformer(name, transformedName, basicClass, transformer);

@@ -6,6 +6,9 @@ import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings({"UnusedDeclaration", "UseOfSystemOutOrSystemErr"})
 public class Log {
+	/*
+	 * This class might get classloaded twice under different classloaders. Don't do anything important in a static {} block.
+	 */
 	public static final Logger LOGGER = LogManager.getLogger("ModPatcher");
 
 	public static void error(String msg) {

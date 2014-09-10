@@ -1,6 +1,6 @@
 package javassist;
 
-import me.nallar.javapatcher.Log;
+import me.nallar.modpatcher.Log;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 
 import java.io.*;
@@ -55,7 +55,7 @@ public class ClassLoaderPool extends ClassPool {
 			try {
 				return new URL(null, "runtimeclass:" + className.replace(".", "/"), new Handler(bytes));
 			} catch (MalformedURLException e) {
-				Log.severe("Failed to make fake URL for " + className, e);
+				Log.error("Failed to make fake URL for " + className, e);
 			}
 		}
 		return source.find(className);

@@ -51,7 +51,7 @@ public class PatchLauncher {
 			}
 		}
 		startupArgs = args = argsList.toArray(new String[argsList.size()]);
-		loadPropertiesFromFile(new File("ttlaunch.properties"));
+		loadPropertiesFromFile(new File("modPatcherLauncher.properties"));
 		if (loc == null) {
 			loc = System.getProperty("serverJar");
 		}
@@ -88,7 +88,7 @@ public class PatchLauncher {
 		if (loc == null) {
 			System.err.println("You have not specified a server jar");
 			System.err.println("Please add --serverJar=<minecraft/forge/mcpc jar name here> at the end of your java arguments.");
-			System.err.println("Example: java -Xmx=2G -XX:MaxPermSize=256m -XX:+AgressiveOpts -jar TT.jar --serverJar=mcpc953.jar");
+			System.err.println("Example: java -Xmx=2G -XX:MaxPermSize=256m -XX:+AgressiveOpts -jar ModPatcher.jar --serverJar=mcpc953.jar");
 			System.exit(1);
 		}
 		File locFile = new File(loc);
