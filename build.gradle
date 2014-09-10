@@ -63,7 +63,7 @@ configurations {
 
 dependencies {
     compile 'com.google.guava:guava:18.0'
-    bundledLibs group:'me.nallar', name:'javapatcher', version:'1.0-SNAPSHOT', changing: true
+    bundledLibs group:'me.nallar', name:'javapatcher', version:'1.0', changing: false
     bundledLibs 'org.javassist:javassist:3.18.2-GA'
     bundledLibs 'com.github.stephenc.high-scale-lib:high-scale-lib:1.1.4'
     bundledLibs 'org.codehaus.jackson:jackson-core-lgpl:1.9.13'
