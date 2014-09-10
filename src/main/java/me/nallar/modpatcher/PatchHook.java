@@ -1,5 +1,6 @@
 package me.nallar.modpatcher;
 
+import javassist.ClassLoaderPool;
 import me.nallar.javapatcher.Log;
 import me.nallar.javapatcher.patcher.Patcher;
 import me.nallar.javapatcher.patcher.Patches;
@@ -52,5 +53,9 @@ public enum PatchHook {;
 			Log.severe("Failed to patch " + transformedName, t);
 		}
 		return originalBytes;
+	}
+
+	public static boolean requiresSrgHook(String transformedName) {
+		return postSrgPatcher.willTransform(transformedName);
 	}
 }

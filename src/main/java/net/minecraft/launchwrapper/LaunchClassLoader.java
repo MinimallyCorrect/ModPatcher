@@ -1,9 +1,14 @@
 package net.minecraft.launchwrapper;
 
+import com.google.common.base.Joiner;
+import cpw.mods.fml.relauncher.FMLRelaunchLog;
+import me.nallar.javapatcher.Log;
+import me.nallar.modpatcher.PatchHook;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 import java.io.*;
+import java.lang.reflect.*;
 import java.net.*;
 import java.security.*;
 import java.util.*;
@@ -12,6 +17,137 @@ import java.util.jar.*;
 import java.util.jar.Attributes.*;
 
 public class LaunchClassLoader extends URLClassLoader {
+	// MP start
+	private IClassTransformer deobfuscationTransformer;
+	public static LaunchClassLoader instance;
+
+	private boolean initedMpPatcher = false;
+	public static final long launchTime = System.currentTimeMillis();
+
+	private static final Method findLoaded = getFindLoaded();
+
+	@SuppressWarnings("MismatchedReadAndWriteOfArray")
+	private static final byte[] CACHE_MISS = new byte[0];
+
+	public static void testForModPatcher() {
+		// Do nothing, just make this method exist.
+	}
+
+	private void mpPatchInit() {
+		if (!initedMpPatcher) {
+			initedMpPatcher = true;
+			try {
+				FMLRelaunchLog.fine("Dummy log message to make sure that FMLRelaunchLog has been set up.");
+			} catch (Throwable t) {
+				System.err.println("Failure in FMLRelaunchLog");
+				t.printStackTrace(System.err);
+			}
+			try {
+				Class.forName("me.nallar.modpatcher.PatchHook");
+			} catch (ClassNotFoundException e) {
+				FMLRelaunchLog.log(Level.ERROR, e, "Failed to init TT PatchHook");
+				System.exit(1);
+			}
+		}
+	}
+
+	private static Method getFindLoaded() {
+		try {
+			Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] { String.class });
+			m.setAccessible(true);
+			return m;
+		} catch (NoSuchMethodException e) {
+			LogWrapper.log(Level.ERROR, e, "Failed to get findLoadedClass method");
+			return null;
+		}
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private static byte[] runTransformer(final String name, final String transformedName, byte[] basicClass, final IClassTransformer transformer) {
+		try {
+			return transformer.transform(name, transformedName, basicClass);
+		} catch (Throwable t) {
+			String message = t.getMessage();
+			if (message != null && message.contains("for invalid side")) {
+				if (t instanceof RuntimeException) {
+					throw (RuntimeException) t;
+				} else if (t instanceof Error) {
+					throw (Error) t;
+				} else {
+					throw new RuntimeException(t);
+				}
+			} else if (basicClass != null || DEBUG_FINER) {
+				FMLRelaunchLog.log((DEBUG_FINER && basicClass != null) ? Level.WARN : Level.TRACE, t, "Failed to transform " + name);
+			}
+			return basicClass;
+		}
+	}
+
+	private final HashMap<String, byte[]> cachedSrgClasses = new HashMap<String, byte[]>();
+
+	private byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
+		byte[] cached = cachedSrgClasses.get(transformedName);
+		if (cached != null) {
+			return cached;
+		}
+		for (final IClassTransformer transformer : transformers) {
+			basicClass = runTransformer(name, transformedName, basicClass, transformer);
+			if (transformer == deobfuscationTransformer) {
+				cachedSrgClasses.put(transformedName, basicClass);
+				return basicClass;
+			}
+		}
+		throw new RuntimeException("No SRG transformer!" + Joiner.on(",\n").join(transformers) + " -> " + deobfuscationTransformer);
+	}
+
+	private byte[] transformAfterSrg(final String name, final String transformedName, byte[] basicClass) {
+		boolean pastSrg = false;
+		for (final IClassTransformer transformer : transformers) {
+			if (pastSrg) {
+				basicClass = runTransformer(name, transformedName, basicClass, transformer);
+			} else if (transformer == deobfuscationTransformer) {
+				pastSrg = true;
+			}
+		}
+		if (!pastSrg) {
+			throw new RuntimeException("No SRG transformer!" + Joiner.on(",\n").join(transformers) + " -> " + deobfuscationTransformer);
+		}
+		return basicClass;
+	}
+
+	public byte[] getPreSrgBytes(String name) {
+		name = untransformName(name);
+		try {
+			return getClassBytes(name);
+		} catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
+	}
+
+	public byte[] getSrgBytes(String name) {
+		final String transformedName = transformName(name);
+		name = untransformName(name);
+		byte[] cached = cachedSrgClasses.get(transformedName);
+		if (cached != null) {
+			return cached;
+		}
+		try {
+			byte[] bytes = getClassBytes(name);
+			return transformUpToSrg(name, transformedName, bytes);
+		} catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
+	}
+
+	public boolean excluded(String name) {
+		for (final String exception : classLoaderExceptions) {
+			if (name.startsWith(exception)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	// MP end
 	public static final int BUFFER_SIZE = 1 << 12;
 	private List<URL> sources;
 	private ClassLoader parent = getClass().getClassLoader();
@@ -40,22 +176,32 @@ public class LaunchClassLoader extends URLClassLoader {
 
 	public LaunchClassLoader(URL[] sources) {
 		super(sources, null);
+		// MP start
+		if (instance == null) {
+			instance = this;
+			Thread.currentThread().setContextClassLoader(this);
+		} else {
+			LogWrapper.log(Level.ERROR, new Throwable(), "Initing multiple LaunchClassLoaders - what?!");
+		}
+		// MP end
 		this.sources = new ArrayList<URL>(Arrays.asList(sources));
 
+		// MP start
 		// classloader exclusions
 		addClassLoaderExclusion("java.");
+		addClassLoaderExclusion("javassist.");
 		addClassLoaderExclusion("sun.");
 		addClassLoaderExclusion("org.lwjgl.");
 		addClassLoaderExclusion("org.apache.logging.");
 		addClassLoaderExclusion("net.minecraft.launchwrapper.");
+		addClassLoaderExclusion("argo.");
+		addClassLoaderExclusion("org.objectweb.asm.");
 
 		// transformer exclusions
 		addTransformerExclusion("javax.");
-		addTransformerExclusion("argo.");
-		addTransformerExclusion("org.objectweb.asm.");
 		addTransformerExclusion("com.google.common.");
 		addTransformerExclusion("org.bouncycastle.");
-		addTransformerExclusion("net.minecraft.launchwrapper.injector.");
+		// MP end
 
 		if (DEBUG_SAVE) {
 			int x = 1;
@@ -77,10 +223,32 @@ public class LaunchClassLoader extends URLClassLoader {
 	public void registerTransformer(String transformerClassName) {
 		try {
 			IClassTransformer transformer = (IClassTransformer) loadClass(transformerClassName).newInstance();
-			transformers.add(transformer);
+			// MP start
 			if (transformer instanceof IClassNameTransformer && renameTransformer == null) {
 				renameTransformer = (IClassNameTransformer) transformer;
 			}
+			if (transformerClassName.equals("cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer")) {
+				deobfuscationTransformer = transformer;
+				ArrayList<IClassTransformer> oldTransformersList = new ArrayList<IClassTransformer>(transformers);
+				transformers.clear();
+				IClassTransformer eventTransformer = null;
+				for (IClassTransformer transformer_ : oldTransformersList) {
+					if (transformer_.getClass().getName().equals("net.minecraftforge.transformers.EventTransformer")) {
+						eventTransformer = transformer_;
+					} else {
+						transformers.add(transformer_);
+					}
+				}
+				transformers.add(transformer);
+				if (eventTransformer == null) {
+					FMLRelaunchLog.severe("Failed to find event transformer.");
+				} else {
+					transformers.add(eventTransformer);
+				}
+			} else {
+				transformers.add(transformer);
+			}
+			// MP end
 		} catch (Exception e) {
 			LogWrapper.log(Level.ERROR, e, "A critical problem occurred registering the ASM transformer class %s", transformerClassName);
 		}
@@ -92,20 +260,44 @@ public class LaunchClassLoader extends URLClassLoader {
 			throw new ClassNotFoundException(name);
 		}
 
-		for (final String exception : classLoaderExceptions) {
-			if (name.startsWith(exception)) {
-				return parent.loadClass(name);
+		// MP start
+		if (excluded(name)) {
+			return parent.loadClass(name);
+		}
+
+		Class alreadyLoaded = null;
+		try {
+			alreadyLoaded = (Class) findLoaded.invoke(parent, name);
+		} catch (Throwable t) {
+			LogWrapper.log(Level.ERROR, t, "");
+		}
+
+		if (alreadyLoaded != null) {
+			if (name.startsWith("nallar.") && !name.startsWith("nallar.tickthreading.util")) {
+				if (!name.startsWith("nallar.log.")) {
+					LogWrapper.log(Level.ERROR, new Error(), "Already classloaded earlier: " + name);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ignored) {
+					}
+					throw new InternalError("Classloading failure");
+				}
+				return alreadyLoaded;
 			}
 		}
 
-		if (cachedClasses.containsKey(name)) {
-			return cachedClasses.get(name);
+		Class<?> cached = cachedClasses.get(name);
+		if (cached != null) {
+			return cached;
 		}
 
 		for (final String exception : transformerExceptions) {
 			if (name.startsWith(exception)) {
 				try {
 					final Class<?> clazz = super.findClass(name);
+					if (clazz == null) {
+						throw new ClassNotFoundException("null from super.findClass");
+					}
 					cachedClasses.put(name, clazz);
 					return clazz;
 				} catch (ClassNotFoundException e) {
@@ -117,19 +309,24 @@ public class LaunchClassLoader extends URLClassLoader {
 
 		try {
 			final String transformedName = transformName(name);
-			if (cachedClasses.containsKey(transformedName)) {
-				return cachedClasses.get(transformedName);
+			if (!transformedName.equals(name)) {
+				FMLRelaunchLog.severe("Asked for " + name + ", giving " + transformedName);
+				cached = cachedClasses.get(transformedName);
+				if (cached != null) {
+					return cached;
+				}
 			}
 
 			final String untransformedName = untransformName(name);
 
 			final int lastDot = untransformedName.lastIndexOf('.');
 			final String packageName = lastDot == -1 ? "" : untransformedName.substring(0, lastDot);
-			final String fileName = untransformedName.replace('.', '/').concat(".class");
+			final String fileName = untransformedName.replace('.', '/') + ".class";
 			URLConnection urlConnection = findCodeSourceConnectionFor(fileName);
 
 			CodeSigner[] signers = null;
 
+			byte[] classBytes = null;
 			if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.")) {
 				if (urlConnection instanceof JarURLConnection) {
 					final JarURLConnection jarURLConnection = (JarURLConnection) urlConnection;
@@ -140,10 +337,10 @@ public class LaunchClassLoader extends URLClassLoader {
 						final JarEntry entry = jarFile.getJarEntry(fileName);
 
 						Package pkg = getPackage(packageName);
-						getClassBytes(untransformedName);
+						classBytes = getClassBytes(untransformedName);
 						signers = entry.getCodeSigners();
 						if (pkg == null) {
-							pkg = definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
+							definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
 						} else {
 							if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
 								LogWrapper.severe("The jar file %s is trying to seal already secured path %s", jarFile.getName(), packageName);
@@ -155,14 +352,19 @@ public class LaunchClassLoader extends URLClassLoader {
 				} else {
 					Package pkg = getPackage(packageName);
 					if (pkg == null) {
-						pkg = definePackage(packageName, null, null, null, null, null, null, null);
+						definePackage(packageName, null, null, null, null, null, null, null);
 					} else if (pkg.isSealed()) {
 						LogWrapper.severe("The URL %s is defining elements for sealed path %s", urlConnection.getURL(), packageName);
 					}
 				}
 			}
 
-			final byte[] transformedClass = runTransformers(untransformedName, transformedName, getClassBytes(untransformedName));
+			if (classBytes == null) {
+				classBytes = getClassBytes(untransformedName);
+			}
+
+			final byte[] transformedClass = runTransformers(untransformedName, transformedName, classBytes);
+			// MP end
 			if (DEBUG_SAVE) {
 				saveTransformedClass(transformedClass, transformedName);
 			}
@@ -254,21 +456,26 @@ public class LaunchClassLoader extends URLClassLoader {
 	}
 
 	private byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
-		if (DEBUG_FINER) {
-			LogWrapper.finest("Beginning transform of {%s (%s)} Start Length: %d", name, transformedName, (basicClass == null ? 0 : basicClass.length));
-			for (final IClassTransformer transformer : transformers) {
-				final String transName = transformer.getClass().getName();
-				LogWrapper.finest("Before Transformer {%s (%s)} %s: %d", name, transformedName, transName, (basicClass == null ? 0 : basicClass.length));
-				basicClass = transformer.transform(name, transformedName, basicClass);
-				LogWrapper.finest("After  Transformer {%s (%s)} %s: %d", name, transformedName, transName, (basicClass == null ? 0 : basicClass.length));
+		// MP start
+		mpPatchInit();
+		basicClass = PatchHook.preSrgTransformationHook(name, transformedName, basicClass);
+		if (deobfuscationTransformer == null) {
+			if (transformedName.startsWith("net.minecraft.") && !transformedName.contains("ClientBrandRetriever")) {
+				Log.severe("Transforming " + name + " before SRG transformer has been added.", new Throwable());
 			}
-			LogWrapper.finest("Ending transform of {%s (%s)} Start Length: %d", name, transformedName, (basicClass == null ? 0 : basicClass.length));
-		} else {
-			for (final IClassTransformer transformer : transformers) {
-				basicClass = transformer.transform(name, transformedName, basicClass);
+			if (PatchHook.requiresSrgHook(transformedName)) {
+				Log.severe("Class " + name + " must be transformed postSrg, but the SRG transformer has not been added to the classloader.", new Throwable());
 			}
+			for (final IClassTransformer transformer : transformers) {
+				basicClass = runTransformer(name, transformedName, basicClass, transformer);
+			}
+			return basicClass;
 		}
+		basicClass = transformUpToSrg(name, transformedName, basicClass);
+		basicClass = PatchHook.postSrgTransformationHook(name, transformedName, basicClass);
+		basicClass = transformAfterSrg(name, transformedName, basicClass);
 		return basicClass;
+		// MP end
 	}
 
 	@Override
@@ -329,15 +536,20 @@ public class LaunchClassLoader extends URLClassLoader {
 	}
 
 	public byte[] getClassBytes(String name) throws IOException {
-		if (negativeResourceCache.contains(name)) {
+		// MP start
+		if (name.startsWith("java/")) {
 			return null;
-		} else if (resourceCache.containsKey(name)) {
-			return resourceCache.get(name);
+		}
+		name = name.replace('/', '.');
+		byte[] cached = resourceCache.get(name);
+		if (cached != null) {
+			return cached == CACHE_MISS ? null : cached;
 		}
 		if (name.indexOf('.') == -1) {
+			String upperCaseName = name.toUpperCase(Locale.ENGLISH);
 			for (final String reservedName : RESERVED_NAMES) {
-				if (name.toUpperCase(Locale.ENGLISH).startsWith(reservedName)) {
-					final byte[] data = getClassBytes("_" + name);
+				if (upperCaseName.startsWith(reservedName)) {
+					final byte[] data = getClassBytes('_' + name);
 					if (data != null) {
 						resourceCache.put(name, data);
 						return data;
@@ -348,12 +560,12 @@ public class LaunchClassLoader extends URLClassLoader {
 
 		InputStream classStream = null;
 		try {
-			final String resourcePath = name.replace('.', '/').concat(".class");
+			final String resourcePath = name.replace('.', '/') + ".class";
 			final URL classResource = findResource(resourcePath);
 
 			if (classResource == null) {
 				if (DEBUG) LogWrapper.finest("Failed to find class resource %s", resourcePath);
-				negativeResourceCache.add(name);
+				resourceCache.put(name, CACHE_MISS);
 				return null;
 			}
 			classStream = classResource.openStream();
@@ -365,6 +577,7 @@ public class LaunchClassLoader extends URLClassLoader {
 		} finally {
 			closeSilently(classStream);
 		}
+		// MP end
 	}
 
 	private static void closeSilently(Closeable closeable) {
@@ -377,6 +590,13 @@ public class LaunchClassLoader extends URLClassLoader {
 	}
 
 	public void clearNegativeEntries(Set<String> entriesToClear) {
-		negativeResourceCache.removeAll(entriesToClear);
+		// MP start
+		for (String entry : entriesToClear) {
+			entry = entry.replace('/', '.');
+			if (resourceCache.get(entry) == CACHE_MISS) {
+				resourceCache.remove(entry);
+			}
+		}
+		// MP end
 	}
 }

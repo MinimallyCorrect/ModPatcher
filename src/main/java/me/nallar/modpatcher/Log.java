@@ -1,7 +1,5 @@
 package me.nallar.modpatcher;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,36 +40,11 @@ public class Log {
 		LOGGER.log(Level.TRACE, msg, t);
 	}
 
-	public static String name(World world) {
-		if (world.provider == null) {
-			return "Broken world with null world.provider";
-		}
-		return world.provider.getDimensionName() + '/' + world.provider.dimensionId;
-	}
-
 	public static String classString(Object o) {
 		return "c " + o.getClass().getName() + ' ';
 	}
 
 	public static void log(Level level, Throwable throwable, String s) {
 		LOGGER.log(level, s, throwable);
-	}
-
-	public static String toString(Object o) {
-		if (o instanceof World) {
-			return name((World) o);
-		}
-		String cS = classString(o);
-		String s = o.toString();
-		if (!s.startsWith(cS)) {
-			s = cS + s;
-		}
-		if (o instanceof TileEntity) {
-			TileEntity tE = (TileEntity) o;
-			if (!s.contains(" x, y, z: ")) {
-				s += " x, y, z: " + tE.xCoord + ", " + tE.yCoord + ", " + tE.zCoord;
-			}
-		}
-		return s;
 	}
 }
