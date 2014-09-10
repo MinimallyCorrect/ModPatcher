@@ -36,7 +36,7 @@ public enum LaunchClassLoaderUtil {
 			return transformers;
 		}
 		try {
-			Field f = instance.getClass().getField("transformers");
+			Field f = instance.getClass().getDeclaredField("transformers");
 			f.setAccessible(true);
 			return transformers = (List<IClassTransformer>) f.get(getInstance());
 		} catch (Exception e) {
@@ -58,7 +58,7 @@ public enum LaunchClassLoaderUtil {
 			return renameTransformer;
 		}
 		try {
-			Field f = instance.getClass().getField("renameTransformer");
+			Field f = instance.getClass().getDeclaredField("renameTransformer");
 			f.setAccessible(true);
 			return renameTransformer = (IClassNameTransformer) f.get(getInstance());
 		} catch (Exception e) {
@@ -73,7 +73,7 @@ public enum LaunchClassLoaderUtil {
 			return classLoaderExceptions;
 		}
 		try {
-			Field f = instance.getClass().getField("classLoaderExceptions");
+			Field f = instance.getClass().getDeclaredField("classLoaderExceptions");
 			f.setAccessible(true);
 			return classLoaderExceptions = (Set<String>) f.get(getInstance());
 		} catch (Exception e) {
