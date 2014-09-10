@@ -16,7 +16,7 @@ public enum LaunchClassLoaderUtil {
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
-	private static final String DEOBFUSCATION_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
+	public static final String DEOBFUSCATION_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
 
 	static {
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;

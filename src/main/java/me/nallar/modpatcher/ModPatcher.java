@@ -8,27 +8,39 @@ import net.minecraft.launchwrapper.IClassTransformer;
 
 import java.io.*;
 
-public class PatchHook implements IClassTransformer {
+public class ModPatcher implements IClassTransformer {
+	public static void addPatchesFromInputStream(InputStream is) {
+		getPatcher().readPatchesFromInputStream(is);
+	}
+
+	public static void addPatchesFromFile(File f) {
+		getPatcher().readPatchesFromFile(f);
+	}
+
+	public static Patcher getPatcher() {
+		return postSrgPatcher;
+	}
+
 	private static final Patcher preSrgPatcher;
 	private static final Patcher postSrgPatcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.PatchHook.alreadyLoaded";
 
 	static {
-		PatcherLog.info("PatchHook running under classloader " + PatchHook.class.getClassLoader().getClass().getName());
+		PatcherLog.info("PatchHook running under classloader " + ModPatcher.class.getClassLoader().getClass().getName());
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
 		if (alreadyLoaded) {
 			PatcherLog.error("Detected multiple classloads of PatchHook - classloading issue?", new Throwable());
 		} else {
 			System.setProperty(ALREADY_LOADED_PROPERTY_NAME, "true");
 		}
-		Patcher preSrgPatcher_ = null;
-		Patcher postSrgPatcher_ = null;
+		Patcher preSrgPatcher_;
+		Patcher postSrgPatcher_;
 		try {
 			preSrgPatcher_ = new Patcher(Patches.class, new ClassLoaderPool(false), new MCPMappings(false));
 			postSrgPatcher_ = new Patcher(Patches.class, new ClassLoaderPool(true), new MCPMappings(true));
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			PatcherLog.error("Failed to create Patcher", t);
-			System.exit(1);
+			throw new RuntimeException(t);
 		}
 		preSrgPatcher = preSrgPatcher_;
 		postSrgPatcher = postSrgPatcher_;
@@ -50,6 +62,7 @@ public class PatchHook implements IClassTransformer {
 		}
 	}
 
+	// TODO - determine whether to remove non-SRG patching? Not usable just now.
 	public static byte[] preSrgTransformationHook(String name, String transformedName, byte[] originalBytes) {
 		try {
 			return preSrgPatcher.transform(name, originalBytes);
@@ -59,6 +72,10 @@ public class PatchHook implements IClassTransformer {
 		return originalBytes;
 	}
 
+	public static boolean requiresSrgHook(String transformedName) {
+		return postSrgPatcher.willTransform(transformedName);
+	}
+
 	public static byte[] postSrgTransformationHook(String name, String transformedName, byte[] originalBytes) {
 		try {
 			return postSrgPatcher.transform(transformedName, originalBytes);
@@ -66,10 +83,6 @@ public class PatchHook implements IClassTransformer {
 			PatcherLog.error("Failed to patch " + transformedName, t);
 		}
 		return originalBytes;
-	}
-
-	public static boolean requiresSrgHook(String transformedName) {
-		return postSrgPatcher.willTransform(transformedName);
 	}
 
 	@Override
