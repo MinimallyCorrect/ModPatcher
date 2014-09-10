@@ -6,7 +6,7 @@ import me.nallar.javapatcher.mappings.ClassDescription;
 import me.nallar.javapatcher.mappings.FieldDescription;
 import me.nallar.javapatcher.mappings.Mappings;
 import me.nallar.javapatcher.mappings.MethodDescription;
-import me.nallar.modpatcher.Log;
+import me.nallar.modpatcher.PatcherLog;
 
 import java.io.*;
 import java.util.*;
@@ -33,9 +33,13 @@ public class MCPMappings extends Mappings {
 	public MCPMappings(boolean seargeMappings) throws IOException {
 		this.seargeMappings = seargeMappings;
 		extendsMap = loadExtends(Mappings.class.getResourceAsStream("/extendsMap.obj"));
-		loadCsv(Mappings.class.getResourceAsStream("/methods.csv"), methodSeargeMappings);
-		loadCsv(Mappings.class.getResourceAsStream("/fields.csv"), fieldSeargeMappings);
-		loadSrg(Mappings.class.getResourceAsStream("/packaged.srg"));
+		try {
+			loadCsv(Mappings.class.getResourceAsStream("/methods.csv"), methodSeargeMappings);
+			loadCsv(Mappings.class.getResourceAsStream("/fields.csv"), fieldSeargeMappings);
+			loadSrg(Mappings.class.getResourceAsStream("/packaged.srg"));
+		} catch (Exception e) {
+			PatcherLog.error("Failed to load MCP mappings", e);
+		}
 		methodSeargeMappings.clear();
 		fieldSeargeMappings.clear();
 	}
@@ -68,7 +72,7 @@ public class MCPMappings extends Mappings {
 			}
 			return extendsMap;
 		} catch (ClassNotFoundException e) {
-			Log.error("Failed to read extends mapping", e);
+			PatcherLog.error("Failed to read extends mapping", e);
 		} finally {
 			objectInputStream.close();
 		}
@@ -128,7 +132,7 @@ public class MCPMappings extends Mappings {
 				if (className == null) {
 					className = methodMatcher.group(1);
 					if (!className.contains(".")) {
-						Log.error("Could not find " + methodMatcher.group(1));
+						PatcherLog.error("Could not find " + methodMatcher.group(1));
 						continue;
 					}
 				}
@@ -148,14 +152,14 @@ public class MCPMappings extends Mappings {
 				if (className == null) {
 					className = fieldMatcher.group(1);
 					if (!className.contains(".")) {
-						Log.error("Could not find " + fieldMatcher.group(1));
+						PatcherLog.error("Could not find " + fieldMatcher.group(1));
 						continue;
 					}
 				}
 				FieldDescription fieldDescription = new FieldDescription(className, fieldName);
 				FieldDescription mapped = map(fieldDescription);
 				if (mapped == null) {
-					Log.error("Could not map " + fieldName);
+					PatcherLog.error("Could not map " + fieldName);
 					fieldMatcher.appendReplacement(result, fieldName);
 				} else {
 					fieldMatcher.appendReplacement(result, mapped.name);
@@ -170,7 +174,7 @@ public class MCPMappings extends Mappings {
 			while (classMatcher.find()) {
 				String className = classStringToClassName(classMatcher.group(1));
 				if (className == null) {
-					Log.error("Could not find " + classMatcher.group(1));
+					PatcherLog.error("Could not find " + classMatcher.group(1));
 					continue;
 				}
 				classMatcher.appendReplacement(result, className);

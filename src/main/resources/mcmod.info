@@ -1,0 +1,18 @@
+{
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "mod_${name}",
+    "name": "Mod Patcher",
+    "description": "Coremod/API for transforming classes using config files.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "http://nallar.me/minecraft",
+    "updateUrl": "",
+    "authorList": [ "nallar" ],
+    "credits": "Authored by nallar, see github for all contributors.",
+    "logoFile": "",
+    "screenshots": [],
+    "requiredMods": [ "Forge" ],
+    "useDependencyInformation": true
+  }]
+}

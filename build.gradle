@@ -16,6 +16,35 @@ buildscript {
 }
 
 apply plugin: 'forge'
+apply plugin: 'maven'
+
+// Extended project information
+ext.projectName = 'ModPatcher'
+ext.inceptionYear = '2014'
+ext.packaging = 'jar'
+ext.url = 'http://nallar.me/minecraft'
+ext.description = 'Mod Patcher'
+ext.organization = 'nallar.me'
+ext.mcVersion = '1.7.10'
+ext.forgeVersion = "10.13.0.1208"
+ext.fullForgeVersion = mcVersion + "-" + forgeVersion
+
+minecraft {
+    version = fullForgeVersion
+    runDir = "eclipse/assets"
+}
+
+sourceCompatibility = '1.6'
+targetCompatibility = '1.6'
+
+version = mcVersion + '-SNAPSHOT'
+group = 'me.nallar'
+archivesBaseName = 'modpatcher'
+
+// Define variables
+ext.buildNumber = project.hasProperty("buildNumber") ? buildNumber : '0'
+ext.ciSystem = project.hasProperty("ciSystem") ? ciSystem : 'unknown'
+ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 
 repositories {
     mavenCentral()
@@ -41,38 +70,34 @@ dependencies {
     bundledLibs 'org.codehaus.jackson:jackson-mapper-lgpl:1.9.13'
 }
 
-minecraft {
-    version = "1.7.10-10.13.0.1208"
-    runDir = "eclipse/assets"
-}
+ext.mappingsPath = System.properties['user.home'] + '/.gradle/caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
 
 jar {
     from(configurations.bundledLibs.collect { it.isDirectory() ? it : zipTree(it) }) {
         exclude "META-INF/**"
     }
-	from './build/unpacked/conf/packaged.srg'
+    from mappingsPath + 'packaged.srg'
+    from mappingsPath + 'methods.csv'
+    from mappingsPath + 'fields.csv'
     from './generated/extendsMap.obj'
 }
 
-sourceCompatibility = '1.6'
-targetCompatibility = '1.6'
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
 
-version = '1.7.10-SNAPSHOT'
-group = 'me.nallar'
-archivesBaseName = 'modpatcher'
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
 
-// Extended project information
-ext.projectName = 'ModPatcher'
-ext.inceptionYear = '2014'
-ext.packaging = 'jar'
-ext.url = 'http://nallar.me/minecraft'
-ext.description = 'Mod Patcher'
-ext.organization = 'nallar.me'
+        // replace version and mcversion
+        expand 'version': project.version, 'mcversion': project.minecraft.version, 'name': project.projectName
+    }
 
-// Define variables
-ext.buildNumber = project.hasProperty("buildNumber") ? buildNumber : '0'
-ext.ciSystem = project.hasProperty("ciSystem") ? ciSystem : 'unknown'
-ext.commit = project.hasProperty("commit") ? commit : 'unknown'
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) { exclude 'mcmod.info' }
+}
 
 // Source compiler configuration
 tasks.withType(JavaCompile) {
@@ -83,14 +108,12 @@ tasks.withType(JavaCompile) {
 
 import me.nallar.mappingsgenerator.Main;
 
-// used later to call the main stuff.
-
 afterEvaluate {
     project.tasks.deobfBinJar.doLast { task ->
-        Main.generateMappings(task.getOutDirtyJar(), false)
+        Main.generateMappings(task.getOutJar(), false)
     }
     project.tasks.extractMinecraftSrc.doLast { task ->
-        Main.generateMappings("./build/tmp/recompSrc", true)
+        Main.generateMappings(file("./build/tmp/recompSrc"), true)
     }
 }
 
@@ -99,4 +122,6 @@ jar.manifest.mainAttributes(
         "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
         "Implementation-Title": name,
         "Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
-        "Implementation-Vendor": url)
+        "Implementation-Vendor": url,
+        "FMLCorePlugin": "me.nallar.modpatcher.coremod.CoreMod"
+)

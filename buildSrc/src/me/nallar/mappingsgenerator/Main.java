@@ -72,6 +72,7 @@ public class Main {
 	}
 
 	public static void generateMappingsSource(File directory) throws Exception {
+		System.out.println("Source dir " + directory);
 		File generatedDirectory = new File("./generated/");
 		generatedDirectory = generatedDirectory.getCanonicalFile();
 		final File generatedSrcDirectory = new File(generatedDirectory, "src");
@@ -84,11 +85,13 @@ public class Main {
 		final File mainSrcDirectory = new File("./src/main/java/");
 		directory = directory.getCanonicalFile();
 		final int cutoff = directory.toString().length();
+		System.out.println(directory.toPath());
 		java.nio.file.Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
 					throws IOException {
-				if (!path.getFileName().endsWith(".java")) {
+				String name = path.getFileName().toString();
+				if (!name.endsWith(".java")) {
 					return FileVisitResult.CONTINUE;
 				}
 				String fullPath = path.toFile().getCanonicalFile().toString();
@@ -100,6 +103,21 @@ public class Main {
 				dest.getParentFile().mkdirs();
 				java.nio.file.Files.copy(path, dest.toPath());
 				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				if (exc == null) {
+					return FileVisitResult.CONTINUE;
+				} else {
+					// directory iteration failed; propagate exception
+					throw exc;
+				}
 			}
 		});
 	}

@@ -1,7 +1,7 @@
 package javassist;
 
-import me.nallar.modpatcher.Log;
-import net.minecraft.launchwrapper.LaunchClassLoader;
+import me.nallar.modpatcher.LaunchClassLoaderUtil;
+import me.nallar.modpatcher.PatcherLog;
 
 import java.io.*;
 import java.net.*;
@@ -35,14 +35,14 @@ public class ClassLoaderPool extends ClassPool {
 	}
 
 	byte[] getClassBytesRuntime(String className) {
-		if (LaunchClassLoader.instance.excluded(className.replace('/', '.'))) {
+		if (LaunchClassLoaderUtil.excluded(className.replace('/', '.'))) {
 			return null;
 		}
 		try {
-			return preSrg ? LaunchClassLoader.instance.getPreSrgBytes(className) : LaunchClassLoader.instance.getSrgBytes(className);
+			return preSrg ? LaunchClassLoaderUtil.getPreSrgBytes(className) : LaunchClassLoaderUtil.getSrgBytes(className);
 		} catch (RuntimeException e) {
 			if (e.getMessage().contains("No SRG transformer")) {
-				throw new RuntimeException("Classloader used to load LaunchClassLoader: " + LaunchClassLoader.instance.getClass().getClassLoader(), e);
+				throw new RuntimeException("Classloader used to load LaunchClassLoader: " + LaunchClassLoaderUtil.instance.getClass().getClassLoader(), e);
 			}
 			throw e;
 		}
@@ -55,7 +55,7 @@ public class ClassLoaderPool extends ClassPool {
 			try {
 				return new URL(null, "runtimeclass:" + className.replace(".", "/"), new Handler(bytes));
 			} catch (MalformedURLException e) {
-				Log.error("Failed to make fake URL for " + className, e);
+				PatcherLog.error("Failed to make fake URL for " + className, e);
 			}
 		}
 		return source.find(className);
