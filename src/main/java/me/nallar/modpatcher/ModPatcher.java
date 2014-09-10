@@ -23,13 +23,13 @@ public class ModPatcher implements IClassTransformer {
 
 	private static final Patcher preSrgPatcher;
 	private static final Patcher postSrgPatcher;
-	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.PatchHook.alreadyLoaded";
+	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
 
 	static {
-		PatcherLog.info("PatchHook running under classloader " + ModPatcher.class.getClassLoader().getClass().getName());
+		PatcherLog.info("ModPatcher running under classloader " + ModPatcher.class.getClassLoader().getClass().getName());
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
 		if (alreadyLoaded) {
-			PatcherLog.error("Detected multiple classloads of PatchHook - classloading issue?", new Throwable());
+			PatcherLog.error("Detected multiple classloads of ModPatcher - classloading issue?", new Throwable());
 		} else {
 			System.setProperty(ALREADY_LOADED_PROPERTY_NAME, "true");
 		}

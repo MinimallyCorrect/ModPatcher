@@ -21,7 +21,7 @@ public enum LaunchClassLoaderUtil {
 	static {
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
 		if (alreadyLoaded) {
-			PatcherLog.error("Detected multiple classloads of PatchHook - classloading issue?", new Throwable());
+			PatcherLog.error("Detected multiple classloads of LaunchClassLoaderUtil - classloading issue?", new Throwable());
 		} else {
 			System.setProperty(ALREADY_LOADED_PROPERTY_NAME, "true");
 		}
