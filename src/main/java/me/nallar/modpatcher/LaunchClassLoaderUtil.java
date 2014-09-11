@@ -27,7 +27,7 @@ public enum LaunchClassLoaderUtil {
 		}
 	}
 
-	public static LaunchClassLoader instance;
+	static LaunchClassLoader instance;
 
 	private static List<IClassTransformer> transformers;
 

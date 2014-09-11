@@ -42,7 +42,7 @@ public class ClassLoaderPool extends ClassPool {
 			return useSrgMappings ? LaunchClassLoaderUtil.getSrgBytes(className) : LaunchClassLoaderUtil.getPreSrgBytes(className);
 		} catch (RuntimeException e) {
 			if (e.getMessage().contains("No SRG transformer")) {
-				throw new RuntimeException("Classloader used to load LaunchClassLoader: " + LaunchClassLoaderUtil.instance.getClass().getClassLoader(), e);
+				throw new RuntimeException("Classloader used to load LaunchClassLoader: " + LaunchClassLoaderUtil.getInstance().getClass().getClassLoader(), e);
 			}
 			throw e;
 		}

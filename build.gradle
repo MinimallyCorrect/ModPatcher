@@ -73,7 +73,7 @@ if (System.env.GRADLE_USER_HOME) {
 ext.mappingsPath =  homeDir + 'caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
 
 jar {
-    duplicatesStrategy = 'exclude'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from((configurations.runtime - configurations.provided).filter{it.exists()}.collect { it.isDirectory() ? it : zipTree(it) }) {
         exclude "META-INF/**"
     }
@@ -124,5 +124,5 @@ jar.manifest.mainAttributes(
         "Implementation-Title": name,
         "Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
         "Implementation-Vendor": url,
-        "FMLCorePlugin": "me.nallar.modpatcher.coremod.CoreMod"
+        "FMLCorePlugin": "me.nallar.modpatcher.CoreMod"
 )

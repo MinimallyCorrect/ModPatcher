@@ -7,20 +7,23 @@ import me.nallar.modpatcher.mappings.MCPMappings;
 import net.minecraft.launchwrapper.IClassTransformer;
 
 import java.io.*;
+import java.nio.file.*;
 
 public class ModPatcher implements IClassTransformer {
-	public static void addPatchesFromInputStream(InputStream is) {
-		getPatcher().readPatchesFromInputStream(is);
-	}
-
-	public static void addPatchesFromFile(File f) {
-		getPatcher().readPatchesFromFile(f);
-	}
-
+	/**
+	 * Gets the JavaPatcher Patcher instance
+	 *
+	 * @return the Patcher
+	 */
 	public static Patcher getPatcher() {
 		return postSrgPatcher;
 	}
 
+	/**
+	 * Gets the name of the setup class to use in your IFMLLoadingPlugin
+	 *
+	 * @return Name of the ModPatcher setup class
+	 */
 	public static String getSetupClass() {
 		return "me.nallar.modpatcher.ModPatcherSetupClass";
 	}
@@ -28,6 +31,9 @@ public class ModPatcher implements IClassTransformer {
 	private static final Patcher preSrgPatcher;
 	private static final Patcher postSrgPatcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
+
+	public static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
+	public static final String MOD_PATCHES_SRG_DIRECTORY = "./ModPatchesSrg/";
 
 	static {
 		PatcherLog.info("ModPatcher running under classloader " + ModPatcher.class.getClassLoader().getClass().getName());
@@ -49,20 +55,26 @@ public class ModPatcher implements IClassTransformer {
 		preSrgPatcher = preSrgPatcher_;
 		postSrgPatcher = postSrgPatcher_;
 		// TODO - issue #2. Determine layout/config file structure
-		recursivelyAddXmlFiles(new File("./ModPatchesSrg/"), preSrgPatcher);
-		recursivelyAddXmlFiles(new File("./ModPatches/"), postSrgPatcher);
+		recursivelyAddXmlFiles(new File(MOD_PATCHES_SRG_DIRECTORY), preSrgPatcher);
+		recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY), postSrgPatcher);
 	}
 
 	private static void recursivelyAddXmlFiles(File directory, Patcher patcher) {
 		if (!directory.isDirectory()) {
 			return;
 		}
-		for (File f : directory.listFiles()) {
-			if (f.isDirectory()) {
-				recursivelyAddXmlFiles(f, patcher);
-			} else if (f.getName().endsWith(".xml")) {
-				patcher.readPatchesFromFile(f);
+		try {
+			for (File f : directory.listFiles()) {
+				if (f.isDirectory()) {
+					recursivelyAddXmlFiles(f, patcher);
+				} else if (f.getName().endsWith(".xml")) {
+					patcher.readPatchesFromXmlInputStream(new FileInputStream(f));
+				} else if (f.getName().endsWith(".json")) {
+					patcher.readPatchesFromJsonInputStream(new FileInputStream(f));
+				}
 			}
+		} catch (IOException e) {
+			PatcherLog.warn("Failed to load patch", e);
 		}
 	}
 
@@ -92,5 +104,18 @@ public class ModPatcher implements IClassTransformer {
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
 		return postSrgTransformationHook(name, transformedName, bytes);
+	}
+
+	static void modPatcherAsCoreModStartup() {
+		File modPatchesDirectory = new File(MOD_PATCHES_DIRECTORY);
+		if (!modPatchesDirectory.exists()) {
+			modPatchesDirectory.mkdir();
+			try {
+				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.json.example"), new File(modPatchesDirectory, "/modpatcher.json.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.xml.example"), new File(modPatchesDirectory, "/modpatcher.json.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				PatcherLog.warn("Failed to extract example patcher files", e);
+			}
+		}
 	}
 }

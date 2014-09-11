@@ -1,0 +1,7 @@
+<mods>
+	<eventHooks>
+		<class id="net.minecraft.world.World">
+			<insertBefore code="{ System.out.println(&quot;Example logspam&quot;}; }">getBlock</insertBefore>
+		</class>
+	</eventHooks>
+</mods>

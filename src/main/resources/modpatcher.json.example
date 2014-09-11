@@ -1,0 +1,13 @@
+{
+    mods: {
+        eventHooks: {
+            class: {
+                id: "net.minecraft.world.World",
+                insertBefore: {
+                    target: getBlock,
+                    code: """{ System.out.println("Example logspam"}; }"""
+                }
+            }
+        }
+    }
+}

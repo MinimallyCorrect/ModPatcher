@@ -1,7 +1,6 @@
-package me.nallar.modpatcher.coremod;
+package me.nallar.modpatcher;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import me.nallar.modpatcher.ModPatcher;
 
 import java.util.*;
 
@@ -25,7 +24,7 @@ public class CoreMod implements IFMLLoadingPlugin {
 
 	@Override
 	public void injectData(Map<String, Object> data) {
-
+		ModPatcher.modPatcherAsCoreModStartup();
 	}
 
 	@Override
