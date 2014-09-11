@@ -6,6 +6,7 @@ import me.nallar.modpatcher.ModPatcher;
 import java.util.*;
 
 @IFMLLoadingPlugin.Name("ModPatcher")
+@IFMLLoadingPlugin.SortingIndex(1001) // Magic value, after deobf transformer.
 public class CoreMod implements IFMLLoadingPlugin {
 	@Override
 	public String[] getASMTransformerClass() {

@@ -25,14 +25,22 @@ public class ModPatcherSetupClass implements IFMLCallHook {
 		modPatcherInitialised = true;
 		LaunchClassLoaderUtil.instance = classLoader;
 		List<IClassTransformer> transformers = LaunchClassLoaderUtil.getTransformers();
+		boolean foundDeobfuscationTransformer = false;
 		int i = 0;
 		while (i < transformers.size()) {
 			if (transformers.get(i).getClass().getName().equals(LaunchClassLoaderUtil.AFTER_TRANSFORMER_NAME)) {
+				foundDeobfuscationTransformer = true;
 				break;
 			}
 			i++;
 		}
 		i++;
+		if (!foundDeobfuscationTransformer) {
+			PatcherLog.warn("Didn't find deobfuscation transformer " + LaunchClassLoaderUtil.AFTER_TRANSFORMER_NAME + " in transformers list.\n" +
+					"Did you forget to set the SortingIndex for your coremod >= 1001? This message is expected in a deobf environment.");
+			modPatcherInitialised = false;
+			return;
+		}
 		transformers.add(i > transformers.size() ? transformers.size() : i, new ModPatcher());
 	}
 
