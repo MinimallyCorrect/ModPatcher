@@ -120,8 +120,12 @@ public enum LaunchClassLoaderUtil {
 		}
 		Iterable<IClassTransformer> transformers = getTransformers();
 		for (final IClassTransformer transformer : transformers) {
+			String transformerName = transformer.getClass().getName();
+			if (transformerName.endsWith("ModPatcher")) {
+				throw new Error("Recursive classloading detected:\n" + Joiner.on("\n").join(getTransformers()));
+			}
 			basicClass = runTransformer(name, transformedName, basicClass, transformer);
-			if (transformer.getClass().getName().equals(DEOBFUSCATION_NAME)) {
+			if (transformerName.equals(DEOBFUSCATION_NAME)) {
 				cachedSrgClasses.put(transformedName, basicClass);
 				return basicClass;
 			}
