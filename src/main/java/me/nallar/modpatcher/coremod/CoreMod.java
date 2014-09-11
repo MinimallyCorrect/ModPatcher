@@ -1,6 +1,7 @@
 package me.nallar.modpatcher.coremod;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import me.nallar.modpatcher.ModPatcher;
 
 import java.util.*;
 
@@ -18,7 +19,7 @@ public class CoreMod implements IFMLLoadingPlugin {
 
 	@Override
 	public String getSetupClass() {
-		return "me.nallar.modpatcher.ModPatcherSetupClass";
+		return ModPatcher.getSetupClass();
 	}
 
 	@Override

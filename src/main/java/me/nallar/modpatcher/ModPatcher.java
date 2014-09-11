@@ -21,6 +21,10 @@ public class ModPatcher implements IClassTransformer {
 		return postSrgPatcher;
 	}
 
+	public static String getSetupClass() {
+		return "me.nallar.modpatcher.ModPatcherSetupClass";
+	}
+
 	private static final Patcher preSrgPatcher;
 	private static final Patcher postSrgPatcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
