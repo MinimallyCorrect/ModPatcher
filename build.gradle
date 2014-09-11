@@ -55,16 +55,14 @@ configurations {
     all {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
-    bundledLibs
-    compile {
-        extendsFrom bundledLibs
-    }
+    provided
+    compile.extendsFrom provided
 }
 
 dependencies {
-    compile 'com.google.guava:guava:18.0'
-    bundledLibs group:'me.nallar', name:'javapatcher', version:'1.0', changing: false
-    bundledLibs 'org.javassist:javassist:3.18.2-GA'
+    provided 'com.google.guava:guava:18.0'
+    compile group:'me.nallar', name:'javapatcher', version:'1.0', changing: false
+    compile 'org.javassist:javassist:3.18.2-GA'
 }
 
 if (System.env.GRADLE_USER_HOME) {
@@ -75,7 +73,8 @@ if (System.env.GRADLE_USER_HOME) {
 ext.mappingsPath =  homeDir + 'caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
 
 jar {
-    from(configurations.bundledLibs.collect { it.isDirectory() ? it : zipTree(it) }) {
+    duplicatesStrategy = 'exclude'
+    from((configurations.runtime - configurations.provided).collect { it.isDirectory() ? it : zipTree(it) }) {
         exclude "META-INF/**"
     }
     from mappingsPath + 'packaged.srg'
