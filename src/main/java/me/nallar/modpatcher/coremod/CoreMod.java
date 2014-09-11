@@ -8,7 +8,7 @@ import java.util.*;
 public class CoreMod implements IFMLLoadingPlugin {
 	@Override
 	public String[] getASMTransformerClass() {
-		return new String[]{"me.nallar.modpatcher.ModPatcher"};
+		return new String[0];
 	}
 
 	@Override
