@@ -32,6 +32,7 @@ public class ModPatcherSetupClass implements IFMLCallHook {
 			}
 			i++;
 		}
+		i++;
 		transformers.add(i > transformers.size() ? transformers.size() : i, new ModPatcher());
 	}
 
