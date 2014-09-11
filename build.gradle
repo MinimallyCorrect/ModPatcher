@@ -67,7 +67,12 @@ dependencies {
     bundledLibs 'org.javassist:javassist:3.18.2-GA'
 }
 
-ext.mappingsPath = System.properties['user.home'] + '/.gradle/caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
+if (System.env.GRADLE_USER_HOME) {
+    ext.homeDir = System.env.GRADLE_USER_HOME + '/'
+} else {
+    ext.homeDir = System.properties['user.home'] + '/.gradle/'
+}
+ext.mappingsPath =  homeDir + 'caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
 
 jar {
     from(configurations.bundledLibs.collect { it.isDirectory() ? it : zipTree(it) }) {
