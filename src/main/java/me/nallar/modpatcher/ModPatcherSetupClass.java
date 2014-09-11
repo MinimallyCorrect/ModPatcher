@@ -27,11 +27,12 @@ public class ModPatcherSetupClass implements IFMLCallHook {
 		List<IClassTransformer> transformers = LaunchClassLoaderUtil.getTransformers();
 		int i = 0;
 		while (i < transformers.size()) {
-			if (transformers.get(i++).getClass().getName().equals(LaunchClassLoaderUtil.DEOBFUSCATION_NAME)) {
+			if (transformers.get(i).getClass().getName().equals(LaunchClassLoaderUtil.AFTER_TRANSFORMER_NAME)) {
 				break;
 			}
+			i++;
 		}
-		transformers.add(i, new ModPatcher());
+		transformers.add(i > transformers.size() ? transformers.size() : i, new ModPatcher());
 	}
 
 	@Override

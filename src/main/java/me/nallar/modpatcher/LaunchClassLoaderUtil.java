@@ -16,7 +16,7 @@ public enum LaunchClassLoaderUtil {
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
-	public static final String DEOBFUSCATION_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
+	public static final String AFTER_TRANSFORMER_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
 
 	static {
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
@@ -120,12 +120,8 @@ public enum LaunchClassLoaderUtil {
 		}
 		Iterable<IClassTransformer> transformers = getTransformers();
 		for (final IClassTransformer transformer : transformers) {
-			String transformerName = transformer.getClass().getName();
-			if (transformerName.endsWith("ModPatcher")) {
-				throw new Error("Recursive classloading detected:\n" + Joiner.on("\n").join(getTransformers()));
-			}
 			basicClass = runTransformer(name, transformedName, basicClass, transformer);
-			if (transformerName.equals(DEOBFUSCATION_NAME)) {
+			if (transformer.getClass().getName().equals(AFTER_TRANSFORMER_NAME)) {
 				cachedSrgClasses.put(transformedName, basicClass);
 				return basicClass;
 			}
