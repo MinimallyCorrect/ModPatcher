@@ -74,7 +74,7 @@ ext.mappingsPath =  homeDir + 'caches/minecraft/net/minecraftforge/forge/' + ful
 
 jar {
     duplicatesStrategy = 'exclude'
-    from((configurations.runtime - configurations.provided).collect { it.isDirectory() ? it : zipTree(it) }) {
+    from((configurations.runtime - configurations.provided).filter{it.exists()}.collect { it.isDirectory() ? it : zipTree(it) }) {
         exclude "META-INF/**"
     }
     from mappingsPath + 'packaged.srg'
