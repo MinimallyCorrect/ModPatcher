@@ -7,11 +7,12 @@ ModPatcher is licensed under the MIT license.
 
 Usage in your coremod
 ---------
-TODO: Write example plugin using this.
+Detailed instructions are in [COREMOD.md](COREMOD.md), and
+an [example coremod](https://github.com/nallar/ModPatcherExample) project is available.
 
 Usage for quick fixes
 ---------
-TODO: Explain installing as a coremod and adding patches
+TODO: Explain installing ModPatcher as a coremod and adding patches
 
 Download
 ---------
