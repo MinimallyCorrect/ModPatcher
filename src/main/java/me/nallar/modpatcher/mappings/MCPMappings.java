@@ -93,12 +93,11 @@ public class MCPMappings extends Mappings {
 	}
 
 	@Override
-	public MethodDescription rmap(MethodDescription methodDescription) {
+	public MethodDescription unmap(MethodDescription methodDescription) {
 		return (seargeMappings ? methodSrgMappings : methodMappings).inverse().get(methodDescription);
 	}
 
-	@Override
-	public String shortClassNameToFullClassName(String shortName) {
+	private String shortClassNameToFullClassName(String shortName) {
 		return shortClassNameToFullName.get(shortName);
 	}
 

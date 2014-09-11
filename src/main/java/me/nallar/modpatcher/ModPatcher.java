@@ -40,8 +40,8 @@ public class ModPatcher implements IClassTransformer {
 		Patcher preSrgPatcher_;
 		Patcher postSrgPatcher_;
 		try {
-			preSrgPatcher_ = new Patcher(Patches.class, new ClassLoaderPool(false), new MCPMappings(false));
-			postSrgPatcher_ = new Patcher(Patches.class, new ClassLoaderPool(true), new MCPMappings(true));
+			preSrgPatcher_ = new Patcher(new ClassLoaderPool(false), Patches.class, new MCPMappings(false));
+			postSrgPatcher_ = new Patcher(new ClassLoaderPool(true), Patches.class, new MCPMappings(true));
 		} catch (Exception t) {
 			PatcherLog.error("Failed to create Patcher", t);
 			throw new RuntimeException(t);
@@ -69,7 +69,7 @@ public class ModPatcher implements IClassTransformer {
 	// TODO - determine whether to remove non-SRG patching? Not usable just now.
 	public static byte[] preSrgTransformationHook(String name, String transformedName, byte[] originalBytes) {
 		try {
-			return preSrgPatcher.transform(name, originalBytes);
+			return preSrgPatcher.patch(name, originalBytes);
 		} catch (Throwable t) {
 			PatcherLog.error("Failed to patch " + transformedName, t);
 		}
@@ -77,12 +77,12 @@ public class ModPatcher implements IClassTransformer {
 	}
 
 	public static boolean requiresSrgHook(String transformedName) {
-		return postSrgPatcher.willTransform(transformedName);
+		return postSrgPatcher.willPatch(transformedName);
 	}
 
 	public static byte[] postSrgTransformationHook(String name, String transformedName, byte[] originalBytes) {
 		try {
-			return postSrgPatcher.transform(transformedName, originalBytes);
+			return postSrgPatcher.patch(transformedName, originalBytes);
 		} catch (Throwable t) {
 			PatcherLog.error("Failed to patch " + transformedName, t);
 		}
