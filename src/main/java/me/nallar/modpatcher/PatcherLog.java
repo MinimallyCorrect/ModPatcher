@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SuppressWarnings({"UnusedDeclaration", "UseOfSystemOutOrSystemErr"})
+@SuppressWarnings("UnusedDeclaration")
 public class PatcherLog {
 	/*
 	 * This class might get classloaded twice under different classloaders. Don't do anything important in a static {} block.

@@ -101,8 +101,14 @@ public class ModPatcher implements IClassTransformer {
 		return originalBytes;
 	}
 
+	private boolean init;
+
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
+		if (!init) {
+			init = true;
+			getPatcher().logDebugInfo();
+		}
 		return postSrgTransformationHook(name, transformedName, bytes);
 	}
 
