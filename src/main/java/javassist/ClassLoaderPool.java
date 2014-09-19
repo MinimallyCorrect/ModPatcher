@@ -50,6 +50,9 @@ public class ClassLoaderPool extends ClassPool {
 
 	@Override
 	public URL find(String className) {
+		if (!className.contains(".")) {
+			return null;
+		}
 		byte[] bytes = getClassBytesRuntime(className);
 		if (bytes != null) {
 			try {
