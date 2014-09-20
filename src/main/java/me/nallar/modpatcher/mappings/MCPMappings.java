@@ -260,7 +260,7 @@ public class MCPMappings extends Mappings {
 				String name = in.next();
 				String side = in.next();
 				in.nextLine();
-				if ("2".equals(side)) { // 2 = joined 'side'.
+				if ("2".equals(side) || "0".equals("side")) { // 2 = joined 'side'.
 					seargeMappings.put(seargeName, name);
 				}
 			}
