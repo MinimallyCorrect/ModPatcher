@@ -3,7 +3,7 @@
         eventHooks: {
             class: {
                 id: "net.minecraft.world.World",
-                insertBefore: {
+                insertCodeBefore: {
                     target: getBlock,
                     code: """{ System.out.println("Example logspam"}; }"""
                 }
