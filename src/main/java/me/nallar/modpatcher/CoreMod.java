@@ -16,9 +16,9 @@ public class CoreMod implements IFMLLoadingPlugin {
 		((org.apache.logging.log4j.core.Logger) LogManager.getLogger("JavaPatcher")).addAppender(fa);
 	}
 
-    static {
-        logToFile();
-    }
+	static {
+		logToFile();
+	}
 
 	@Override
 	public String[] getASMTransformerClass() {
