@@ -36,7 +36,7 @@ public class CoreMod implements IFMLLoadingPlugin {
 	}
 
 	@Override
-	public void injectData(Map<String, Object> data) {s
+	public void injectData(Map<String, Object> data) {
 		ModPatcher.modPatcherAsCoreModStartup();
 	}
 
