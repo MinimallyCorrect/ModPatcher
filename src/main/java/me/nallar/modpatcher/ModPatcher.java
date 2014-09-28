@@ -118,7 +118,7 @@ public class ModPatcher implements IClassTransformer {
 			modPatchesDirectory.mkdir();
 			try {
 				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.json.example"), new File(modPatchesDirectory, "/modpatcher.json.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
-				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.xml.example"), new File(modPatchesDirectory, "/modpatcher.json.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.xml.example"), new File(modPatchesDirectory, "/modpatcher.xml.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				PatcherLog.warn("Failed to extract example patcher files", e);
 			}
