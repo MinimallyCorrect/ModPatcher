@@ -16,6 +16,10 @@ public class CoreMod implements IFMLLoadingPlugin {
 		((org.apache.logging.log4j.core.Logger) LogManager.getLogger("JavaPatcher")).addAppender(fa);
 	}
 
+    static {
+        logToFile();
+    }
+
 	@Override
 	public String[] getASMTransformerClass() {
 		return new String[0];
@@ -32,8 +36,7 @@ public class CoreMod implements IFMLLoadingPlugin {
 	}
 
 	@Override
-	public void injectData(Map<String, Object> data) {
-		logToFile();
+	public void injectData(Map<String, Object> data) {s
 		ModPatcher.modPatcherAsCoreModStartup();
 	}
 
