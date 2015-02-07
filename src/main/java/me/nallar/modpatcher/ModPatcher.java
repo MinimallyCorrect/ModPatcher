@@ -6,8 +6,13 @@ import me.nallar.javapatcher.patcher.Patches;
 import me.nallar.modpatcher.mappings.MCPMappings;
 import net.minecraft.launchwrapper.IClassTransformer;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class ModPatcher implements IClassTransformer {
 	/**
@@ -32,7 +37,7 @@ public class ModPatcher implements IClassTransformer {
 	private static final Patcher postSrgPatcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
 	private static final String DUMP_PROPERTY_NAME = "nallar.ModPatcher.dump";
-    private static final boolean DUMP = !System.getProperty(DUMP_PROPERTY_NAME, "").isEmpty();
+	private static final boolean DUMP = !System.getProperty(DUMP_PROPERTY_NAME, "").isEmpty();
 
 	public static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
 	public static final String MOD_PATCHES_SRG_DIRECTORY = "./ModPatchesSrg/";
@@ -111,15 +116,15 @@ public class ModPatcher implements IClassTransformer {
 			init = true;
 			getPatcher().logDebugInfo();
 		}
-        if (DUMP) {
-            Path path = Paths.get("./DUMP/" + name);
-            try {
-                Files.createDirectories(path.getParent());
-                Files.write(path, bytes);
-            } catch (IOException e) {
-                PatcherLog.error("Failed to dump class " + name, e);
-            }
-        }
+		if (DUMP) {
+			Path path = Paths.get("./DUMP/" + name);
+			try {
+				Files.createDirectories(path.getParent());
+				Files.write(path, bytes);
+			} catch (IOException e) {
+				PatcherLog.error("Failed to dump class " + name, e);
+			}
+		}
 		return postSrgTransformationHook(name, transformedName, bytes);
 	}
 
