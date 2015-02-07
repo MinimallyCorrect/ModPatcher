@@ -26,7 +26,7 @@ ext.url = 'http://nallar.me/minecraft'
 ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
 ext.mcVersion = '1.7.10'
-ext.forgeVersion = "10.13.0.1208"
+ext.forgeVersion = "10.13.2.1230"
 ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 
 minecraft {
