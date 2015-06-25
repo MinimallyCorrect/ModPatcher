@@ -1,18 +1,18 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-    }
+	repositories {
+		mavenCentral()
+		maven {
+			name = "forge"
+			url = "http://files.minecraftforge.net/maven"
+		}
+		maven {
+			name = "sonatype"
+			url = "https://oss.sonatype.org/content/repositories/snapshots/"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+	}
 }
 
 apply plugin: 'forge'
@@ -26,12 +26,12 @@ ext.url = 'http://nallar.me/minecraft'
 ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
 ext.mcVersion = '1.7.10'
-ext.forgeVersion = "10.13.2.1230"
-ext.fullForgeVersion = mcVersion + "-" + forgeVersion
+ext.forgeVersion = "10.13.4.1481"
+ext.fullForgeVersion = mcVersion + "-" + forgeVersion + "-" + mcVersion
 
 minecraft {
-    version = fullForgeVersion
-    runDir = "eclipse/assets"
+	version = fullForgeVersion
+	runDir = "eclipse/assets"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_7
@@ -47,82 +47,84 @@ ext.ciSystem = System.getenv("JENKINS_URL") ? 'Jenkins' : 'unknown'
 ext.commit = System.getenv("GIT_COMMIT") ?: 'unknown'
 
 repositories {
-    mavenCentral()
-    maven { url 'http://repo.nallar.me/' }
+	mavenCentral()
+	maven { url 'http://repo.nallar.me/' }
 }
 
 configurations {
-    all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-    provided
-    compile.extendsFrom provided
+	all {
+		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	}
+	provided
+	compile.extendsFrom provided
 }
 
 dependencies {
-    provided 'com.google.guava:guava:18.0'
-    compile group:'me.nallar', name:'javapatcher', version:'1.1-SNAPSHOT', changing: true
-    compile 'org.javassist:javassist:3.18.2-GA'
+	provided 'com.google.guava:guava:18.0'
+	compile group: 'me.nallar', name: 'javapatcher', version: '1.1-SNAPSHOT', changing: true
+	compile 'org.javassist:javassist:3.18.2-GA'
 }
 
 if (System.env.GRADLE_USER_HOME) {
-    ext.homeDir = System.env.GRADLE_USER_HOME + '/'
+	ext.homeDir = System.env.GRADLE_USER_HOME + '/'
 } else {
-    ext.homeDir = System.properties['user.home'] + '/.gradle/'
+	ext.homeDir = System.properties['user.home'] + '/.gradle/'
 }
-ext.mappingsPath =  homeDir + 'caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
+ext.mappingsPath = homeDir + 'caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
 
 jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from((configurations.runtime - configurations.provided).filter{it.exists()}.collect { it.isDirectory() ? it : zipTree(it) }) {
-        exclude "META-INF/**"
-    }
-    from mappingsPath + 'packaged.srg'
-    from mappingsPath + 'methods.csv'
-    from mappingsPath + 'fields.csv'
-    from './generated/extendsMap.obj'
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from((configurations.runtime - configurations.provided).filter { it.exists() }.collect {
+		it.isDirectory() ? it : zipTree(it)
+	}) {
+		exclude "META-INF/**"
+	}
+	from mappingsPath + 'packaged.srg'
+	from mappingsPath + 'methods.csv'
+	from mappingsPath + 'fields.csv'
+	from './generated/extendsMap.obj'
 }
 
 processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+	// this will ensure that this task is redone when the versions change.
+	inputs.property "version", project.version
+	inputs.property "mcversion", project.minecraft.version
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
+	// replace stuff in mcmod.info, nothing else
+	from(sourceSets.main.resources.srcDirs) {
+		include 'mcmod.info'
 
-        // replace version and mcversion
-        expand 'version': project.version, 'mcversion': project.minecraft.version, 'name': project.projectName
-    }
+		// replace version and mcversion
+		expand 'version': project.version, 'mcversion': project.minecraft.version, 'name': project.projectName
+	}
 
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) { exclude 'mcmod.info' }
+	// copy everything else, thats not the mcmod.info
+	from(sourceSets.main.resources.srcDirs) { exclude 'mcmod.info' }
 }
 
 // Source compiler configuration
 tasks.withType(JavaCompile) {
-    options.compilerArgs += [ '-Xlint:all', '-Xlint:-path' ]
-    options.deprecation = true
-    options.encoding = 'utf8'
+	options.compilerArgs += ['-Xlint:all', '-Xlint:-path']
+	options.deprecation = true
+	options.encoding = 'utf8'
 }
 
 import me.nallar.mappingsgenerator.Main;
 
 afterEvaluate {
-    project.tasks.deobfBinJar.doLast { task ->
-        Main.generateMappings(task.getOutJar(), false)
-    }
-    project.tasks.extractMinecraftSrc.doLast { task ->
-        Main.generateMappings(file("./build/tmp/recompSrc"), true)
-    }
+	project.tasks.deobfBinJar.doLast { task ->
+		Main.generateMappings(task.getOutJar(), false)
+	}
+	project.tasks.extractMinecraftSrc.doLast { task ->
+		Main.generateMappings(file("./build/tmp/recompSrc"), true)
+	}
 }
 
 jar.manifest.mainAttributes(
-        "Built-By": System.properties['user.name'],
-        "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
-        "Implementation-Title": name,
-        "Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
-        "Implementation-Vendor": url,
-        "FMLCorePlugin": "me.nallar.modpatcher.CoreMod"
+	"Built-By": System.properties['user.name'],
+	"Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
+	"Implementation-Title": name,
+	"Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
+	"Implementation-Vendor": url,
+	"FMLCorePlugin": "me.nallar.modpatcher.CoreMod"
 )
