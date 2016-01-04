@@ -1,6 +1,5 @@
 package me.nallar.mappingsgenerator;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -12,23 +11,6 @@ import java.util.*;
 import java.util.jar.*;
 
 public class Main {
-	/**
-	 * @param jar    File
-	 * @param source if TRUE source, if FALSE binary
-	 */
-	public static void generateMappings(File jar, boolean source) throws Exception {
-		try {
-			if (source) {
-				generateMappingsSource(jar);
-			} else {
-				generateMappingsBinary(jar);
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-			Throwables.propagate(t);
-		}
-	}
-
 	private static final HashMap<String, String> classExtends = new HashMap<String, String>();
 
 	public static void addClassToExtendsMap(byte[] inputCode) {
@@ -41,7 +23,7 @@ public class Main {
 		}
 	}
 
-	public static void generateMappingsBinary(File jar) throws Exception {
+	public static void generateMappings(File jar) throws Exception {
 		// READING
 		JarInputStream istream = new JarInputStream(new FileInputStream(jar));
 		JarEntry entry;
@@ -71,8 +53,8 @@ public class Main {
 
 	}
 
-	public static void generateMappingsSource(File directory) throws Exception {
-		System.out.println("Source dir " + directory);
+	public static void extractGeneratedSources(File jar) throws Exception {
+		System.out.println("Source dir " + jar);
 		File generatedDirectory = new File("./generated/");
 		generatedDirectory = generatedDirectory.getCanonicalFile();
 		final File generatedSrcDirectory = new File(generatedDirectory, "src");
@@ -83,43 +65,26 @@ public class Main {
 		generatedSrcDirectory.mkdirs();
 
 		final File mainSrcDirectory = new File("./src/main/java/");
-		directory = directory.getCanonicalFile();
-		final int cutoff = directory.toString().length();
-		System.out.println(directory.toPath());
-		java.nio.file.Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
-					throws IOException {
-				String name = path.getFileName().toString();
-				if (!name.endsWith(".java")) {
-					return FileVisitResult.CONTINUE;
-				}
-				String fullPath = path.toFile().getCanonicalFile().toString();
-				String part = fullPath.substring(cutoff);
+		jar = jar.getCanonicalFile();
+
+		JarInputStream istream = new JarInputStream(new FileInputStream(jar));
+		JarEntry entry;
+		while ((entry = istream.getNextJarEntry()) != null) {
+			String part = entry.getName();
+			byte[] sourceBytes = ByteStreams.toByteArray(istream);
+			if (part.endsWith(".java")) {
+				// Source file
 				if (new File(mainSrcDirectory, part).exists()) {
-					return FileVisitResult.CONTINUE;
+					continue;
 				}
 				File dest = new File(generatedSrcDirectory, part);
 				dest.getParentFile().mkdirs();
-				java.nio.file.Files.copy(path, dest.toPath());
-				return FileVisitResult.CONTINUE;
+				Files.write(dest.toPath(), sourceBytes);
 			}
 
-			@Override
-			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				if (exc == null) {
-					return FileVisitResult.CONTINUE;
-				} else {
-					// directory iteration failed; propagate exception
-					throw exc;
-				}
-			}
-		});
+			istream.closeEntry();
+		}
+		istream.close();
 	}
 
 	public static void deleteDirectory(Path path) throws IOException {

@@ -1,8 +1,8 @@
 package me.nallar.modpatcher;
 
-import cpw.mods.fml.relauncher.IFMLCallHook;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.fml.relauncher.IFMLCallHook;
 
 import java.util.*;
 

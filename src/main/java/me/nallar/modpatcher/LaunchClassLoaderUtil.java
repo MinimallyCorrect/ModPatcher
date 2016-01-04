@@ -1,10 +1,10 @@
 package me.nallar.modpatcher;
 
 import com.google.common.base.Joiner;
-import cpw.mods.fml.relauncher.FMLRelaunchLog;
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
 import org.apache.logging.log4j.Level;
 
 import java.io.*;
