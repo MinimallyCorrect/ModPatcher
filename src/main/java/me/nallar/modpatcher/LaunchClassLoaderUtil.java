@@ -13,10 +13,16 @@ import java.util.*;
 
 public enum LaunchClassLoaderUtil {
 	;
+	public static final String AFTER_TRANSFORMER_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
-	public static final String AFTER_TRANSFORMER_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
+	private static final HashMap<String, byte[]> cachedSrgClasses = new HashMap<String, byte[]>();
+	static LaunchClassLoader instance;
+
+	private static List<IClassTransformer> transformers;
+	private static IClassNameTransformer renameTransformer;
+	private static Set<String> classLoaderExceptions;
 
 	static {
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
@@ -26,10 +32,6 @@ public enum LaunchClassLoaderUtil {
 			System.setProperty(ALREADY_LOADED_PROPERTY_NAME, "true");
 		}
 	}
-
-	static LaunchClassLoader instance;
-
-	private static List<IClassTransformer> transformers;
 
 	public static List<IClassTransformer> getTransformers() {
 		if (transformers != null) {
@@ -51,8 +53,6 @@ public enum LaunchClassLoaderUtil {
 		throw new Error("Tried to retrieve LaunchClassLoader instance before setting up the transformer");
 	}
 
-	private static IClassNameTransformer renameTransformer;
-
 	private static IClassNameTransformer getRenameTransformer() {
 		if (renameTransformer != null) {
 			return renameTransformer;
@@ -65,8 +65,6 @@ public enum LaunchClassLoaderUtil {
 			throw new RuntimeException(e);
 		}
 	}
-
-	private static Set<String> classLoaderExceptions;
 
 	private static Set<String> getClassLoaderExceptions() {
 		if (classLoaderExceptions != null) {
@@ -89,8 +87,6 @@ public enum LaunchClassLoaderUtil {
 		}
 		return false;
 	}
-
-	private static final HashMap<String, byte[]> cachedSrgClasses = new HashMap<String, byte[]>();
 
 	@SuppressWarnings("ConstantConditions")
 	private static byte[] runTransformer(final String name, final String transformedName, byte[] basicClass, final IClassTransformer transformer) {

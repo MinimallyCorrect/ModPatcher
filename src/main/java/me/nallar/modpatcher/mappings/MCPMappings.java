@@ -57,6 +57,25 @@ public class MCPMappings extends Mappings {
 		}
 	}*/
 
+	private static void loadCsv(InputStream mappingsCsv, Map<String, String> seargeMappings) throws IOException {
+		Scanner in = new Scanner(mappingsCsv);
+		try {
+			in.useDelimiter(",");
+			while (in.hasNextLine()) {
+				String seargeName = in.next();
+				String name = in.next();
+				String side = in.next();
+				in.nextLine();
+				if ("2".equals(side) || "0".equals(side)) { // 2 = joined 'side'.
+					seargeMappings.put(seargeName, name);
+				}
+			}
+		} finally {
+			in.close();
+		}
+		mappingsCsv.close();
+	}
+
 	private Map<String, List<String>> loadExtends(InputStream resourceAsStream) throws IOException {
 		ObjectInputStream objectInputStream = new ObjectInputStream(resourceAsStream);
 		try {
@@ -249,24 +268,5 @@ public class MCPMappings extends Mappings {
 			fieldSrgMappings.put(newDeobf, newSrgField);
 			recursiveExtendFieldMappings(newDeobf, newSrgField);
 		}
-	}
-
-	private static void loadCsv(InputStream mappingsCsv, Map<String, String> seargeMappings) throws IOException {
-		Scanner in = new Scanner(mappingsCsv);
-		try {
-			in.useDelimiter(",");
-			while (in.hasNextLine()) {
-				String seargeName = in.next();
-				String name = in.next();
-				String side = in.next();
-				in.nextLine();
-				if ("2".equals(side) || "0".equals(side)) { // 2 = joined 'side'.
-					seargeMappings.put(seargeName, name);
-				}
-			}
-		} finally {
-			in.close();
-		}
-		mappingsCsv.close();
 	}
 }

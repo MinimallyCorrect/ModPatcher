@@ -6,41 +6,17 @@ import me.nallar.javapatcher.patcher.Patches;
 import me.nallar.modpatcher.mappings.MCPMappings;
 import net.minecraft.launchwrapper.IClassTransformer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.*;
+import java.nio.file.*;
 
 public class ModPatcher implements IClassTransformer {
-	/**
-	 * Gets the JavaPatcher Patcher instance
-	 *
-	 * @return the Patcher
-	 */
-	public static Patcher getPatcher() {
-		return postSrgPatcher;
-	}
-
-	/**
-	 * Gets the name of the setup class to use in your IFMLLoadingPlugin
-	 *
-	 * @return Name of the ModPatcher setup class
-	 */
-	public static String getSetupClass() {
-		return "me.nallar.modpatcher.ModPatcherSetupClass";
-	}
-
+	public static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
+	public static final String MOD_PATCHES_SRG_DIRECTORY = "./ModPatchesSrg/";
 	private static final Patcher preSrgPatcher;
 	private static final Patcher postSrgPatcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
 	private static final String DUMP_PROPERTY_NAME = "nallar.ModPatcher.dump";
 	private static final boolean DUMP = !System.getProperty(DUMP_PROPERTY_NAME, "").isEmpty();
-
-	public static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
-	public static final String MOD_PATCHES_SRG_DIRECTORY = "./ModPatchesSrg/";
 
 	static {
 		PatcherLog.info("ModPatcher running under classloader " + ModPatcher.class.getClassLoader().getClass().getName());
@@ -64,6 +40,26 @@ public class ModPatcher implements IClassTransformer {
 		// TODO - issue #2. Determine layout/config file structure
 		recursivelyAddXmlFiles(new File(MOD_PATCHES_SRG_DIRECTORY), preSrgPatcher);
 		recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY), postSrgPatcher);
+	}
+
+	private boolean init;
+
+	/**
+	 * Gets the JavaPatcher Patcher instance
+	 *
+	 * @return the Patcher
+	 */
+	public static Patcher getPatcher() {
+		return postSrgPatcher;
+	}
+
+	/**
+	 * Gets the name of the setup class to use in your IFMLLoadingPlugin
+	 *
+	 * @return Name of the ModPatcher setup class
+	 */
+	public static String getSetupClass() {
+		return "me.nallar.modpatcher.ModPatcherSetupClass";
 	}
 
 	private static void recursivelyAddXmlFiles(File directory, Patcher patcher) {
@@ -108,7 +104,18 @@ public class ModPatcher implements IClassTransformer {
 		return originalBytes;
 	}
 
-	private boolean init;
+	static void modPatcherAsCoreModStartup() {
+		File modPatchesDirectory = new File(MOD_PATCHES_DIRECTORY);
+		if (!modPatchesDirectory.exists()) {
+			modPatchesDirectory.mkdir();
+			try {
+				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.json.example"), new File(modPatchesDirectory, "/modpatcher.json.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.xml.example"), new File(modPatchesDirectory, "/modpatcher.xml.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				PatcherLog.warn("Failed to extract example patcher files", e);
+			}
+		}
+	}
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
@@ -126,18 +133,5 @@ public class ModPatcher implements IClassTransformer {
 			}
 		}
 		return postSrgTransformationHook(name, transformedName, bytes);
-	}
-
-	static void modPatcherAsCoreModStartup() {
-		File modPatchesDirectory = new File(MOD_PATCHES_DIRECTORY);
-		if (!modPatchesDirectory.exists()) {
-			modPatchesDirectory.mkdir();
-			try {
-				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.json.example"), new File(modPatchesDirectory, "/modpatcher.json.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
-				Files.copy(ModPatcher.class.getResourceAsStream("/modpatcher.xml.example"), new File(modPatchesDirectory, "/modpatcher.xml.example").toPath(), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				PatcherLog.warn("Failed to extract example patcher files", e);
-			}
-		}
 	}
 }
