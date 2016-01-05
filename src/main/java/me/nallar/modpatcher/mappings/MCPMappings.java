@@ -21,17 +21,13 @@ public class MCPMappings extends Mappings {
 	private final BiMap<ClassDescription, ClassDescription> classMappings = HashBiMap.create();
 	private final BiMap<MethodDescription, MethodDescription> methodMappings = HashBiMap.create();
 	private final BiMap<MethodDescription, MethodDescription> methodSrgMappings = HashBiMap.create();
-	private final Map<FieldDescription, FieldDescription> fieldMappings = new HashMap<FieldDescription, FieldDescription>();
 	private final Map<FieldDescription, FieldDescription> fieldSrgMappings = new HashMap<FieldDescription, FieldDescription>();
-	private final Map<String, MethodDescription> parameterlessMethodMappings = new HashMap<String, MethodDescription>();
 	private final Map<String, MethodDescription> parameterlessSrgMethodMappings = new HashMap<String, MethodDescription>();
 	private final Map<String, String> shortClassNameToFullName = new HashMap<String, String>();
 	private final Map<String, List<String>> extendsMap;
-	private final boolean seargeMappings;
 
 	@SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
-	public MCPMappings(boolean seargeMappings) throws IOException {
-		this.seargeMappings = seargeMappings;
+	public MCPMappings() throws IOException {
 		extendsMap = loadExtends(Mappings.class.getResourceAsStream("/extendsMap.obj"));
 		try {
 			loadCsv(Mappings.class.getResourceAsStream("/methods.csv"), methodSeargeMappings);
@@ -43,19 +39,6 @@ public class MCPMappings extends Mappings {
 		methodSeargeMappings.clear();
 		fieldSeargeMappings.clear();
 	}
-
-	/*private void extendFieldMappings(Map<FieldDescription, FieldDescription> map) {
-		Map<FieldDescription, FieldDescription> copy = new HashMap<FieldDescription, FieldDescription>(map);
-		for (Map.Entry<FieldDescription, FieldDescription> e : copy.entrySet()) {
-			FieldDescription obfed = obfed.
-			while (true) {
-				String superClass = extendsMap.get(obfed.className);
-				if (superClass == null) {
-					break;
-				}
-			}
-		}
-	}*/
 
 	private static void loadCsv(InputStream mappingsCsv, Map<String, String> seargeMappings) throws IOException {
 		Scanner in = new Scanner(mappingsCsv);
@@ -100,9 +83,9 @@ public class MCPMappings extends Mappings {
 
 	@Override
 	public MethodDescription map(MethodDescription methodDescription) {
-		MethodDescription obfuscated = (seargeMappings ? methodSrgMappings : methodMappings).get(methodDescription);
+		MethodDescription obfuscated = methodSrgMappings.get(methodDescription);
 		if (obfuscated == null) {
-			obfuscated = (seargeMappings ? parameterlessSrgMethodMappings : parameterlessMethodMappings).get(methodDescription.getShortName());
+			obfuscated = parameterlessSrgMethodMappings.get(methodDescription.getShortName());
 			if (methodDescription.isExact() || obfuscated == null) {
 				obfuscated = methodDescription;
 				obfuscated.obfuscateClasses();
@@ -113,7 +96,7 @@ public class MCPMappings extends Mappings {
 
 	@Override
 	public MethodDescription unmap(MethodDescription methodDescription) {
-		return (seargeMappings ? methodSrgMappings : methodMappings).inverse().get(methodDescription);
+		return methodSrgMappings.inverse().get(methodDescription);
 	}
 
 	private String shortClassNameToFullClassName(String shortName) {
@@ -122,12 +105,12 @@ public class MCPMappings extends Mappings {
 
 	@Override
 	public ClassDescription map(ClassDescription classDescription) {
-		return seargeMappings ? classDescription : classMappings.get(classDescription);
+		return classDescription;
 	}
 
 	@Override
 	public FieldDescription map(FieldDescription fieldDescription) {
-		return (seargeMappings ? fieldSrgMappings : fieldMappings).get(fieldDescription);
+		return fieldSrgMappings.get(fieldDescription);
 	}
 
 	private String classStringToClassName(String name) {
@@ -226,7 +209,6 @@ public class MCPMappings extends Mappings {
 				FieldDescription obfuscatedField = new FieldDescription(obfuscatedMCPName);
 				FieldDescription deobfuscatedField = new FieldDescription(classMappings.inverse().get(new ClassDescription(obfuscatedField.className)).name, deobfuscatedName);
 				FieldDescription srgField = new FieldDescription(deobfuscatedField.className, seargeName);
-				fieldMappings.put(deobfuscatedField, obfuscatedField);
 				fieldSrgMappings.put(deobfuscatedField, srgField);
 				recursiveExtendFieldMappings(deobfuscatedField, srgField);
 			} else if (srgScanner.hasNext("MD:")) {
@@ -248,7 +230,6 @@ public class MCPMappings extends Mappings {
 				MethodDescription srgMethodDescription = new MethodDescription(deobfuscatedClassName, seargeName, deobfuscatedTypeInfo);
 				methodMappings.put(deobfuscatedMethodDescription, obfuscatedMethodDescription);
 				methodSrgMappings.put(deobfuscatedMethodDescription, srgMethodDescription);
-				parameterlessMethodMappings.put(deobfuscatedMethodDescription.getShortName(), obfuscatedMethodDescription);
 				parameterlessSrgMethodMappings.put(deobfuscatedMethodDescription.getShortName(), srgMethodDescription);
 			} else {
 				srgScanner.nextLine();

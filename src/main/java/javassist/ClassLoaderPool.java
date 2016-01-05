@@ -11,10 +11,7 @@ import java.net.*;
  * from the classloader at runtime for patching purposes.
  */
 public class ClassLoaderPool extends ClassPool {
-	private final boolean useSrgMappings;
-
-	public ClassLoaderPool(boolean useSrgMappings) {
-		this.useSrgMappings = useSrgMappings;
+	public ClassLoaderPool() {
 		this.appendSystemPath();
 		this.importPackage("java.util");
 	}
@@ -39,7 +36,7 @@ public class ClassLoaderPool extends ClassPool {
 			return null;
 		}
 		try {
-			return useSrgMappings ? LaunchClassLoaderUtil.getSrgBytes(className) : LaunchClassLoaderUtil.getPreSrgBytes(className);
+			return LaunchClassLoaderUtil.getSrgBytes(className);
 		} catch (RuntimeException e) {
 			if (e.getMessage().contains("No SRG transformer")) {
 				throw new RuntimeException("Classloader used to load LaunchClassLoader: " + LaunchClassLoaderUtil.getInstance().getClass().getClassLoader(), e);

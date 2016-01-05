@@ -11,9 +11,7 @@ import java.nio.file.*;
 
 public class ModPatcher implements IClassTransformer {
 	public static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
-	public static final String MOD_PATCHES_SRG_DIRECTORY = "./ModPatchesSrg/";
-	private static final Patcher preSrgPatcher;
-	private static final Patcher postSrgPatcher;
+	private static final Patcher patcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
 	private static final String DUMP_PROPERTY_NAME = "nallar.ModPatcher.dump";
 	private static final boolean DUMP = !System.getProperty(DUMP_PROPERTY_NAME, "").isEmpty();
@@ -26,20 +24,16 @@ public class ModPatcher implements IClassTransformer {
 		} else {
 			System.setProperty(ALREADY_LOADED_PROPERTY_NAME, "true");
 		}
-		Patcher preSrgPatcher_;
 		Patcher postSrgPatcher_;
 		try {
-			preSrgPatcher_ = new Patcher(new ClassLoaderPool(false), Patches.class, new MCPMappings(false));
-			postSrgPatcher_ = new Patcher(new ClassLoaderPool(true), Patches.class, new MCPMappings(true));
+			postSrgPatcher_ = new Patcher(new ClassLoaderPool(), Patches.class, new MCPMappings());
 		} catch (Exception t) {
 			PatcherLog.error("Failed to create Patcher", t);
 			throw new RuntimeException(t);
 		}
-		preSrgPatcher = preSrgPatcher_;
-		postSrgPatcher = postSrgPatcher_;
+		patcher = postSrgPatcher_;
 		// TODO - issue #2. Determine layout/config file structure
-		recursivelyAddXmlFiles(new File(MOD_PATCHES_SRG_DIRECTORY), preSrgPatcher);
-		recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY), postSrgPatcher);
+		recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY), patcher);
 	}
 
 	private boolean init;
@@ -50,7 +44,7 @@ public class ModPatcher implements IClassTransformer {
 	 * @return the Patcher
 	 */
 	public static Patcher getPatcher() {
-		return postSrgPatcher;
+		return patcher;
 	}
 
 	/**
@@ -81,23 +75,10 @@ public class ModPatcher implements IClassTransformer {
 		}
 	}
 
-	// TODO - determine whether to remove non-SRG patching? Not usable just now.
-	public static byte[] preSrgTransformationHook(String name, String transformedName, byte[] originalBytes) {
-		try {
-			return preSrgPatcher.patch(name, originalBytes);
-		} catch (Throwable t) {
-			PatcherLog.error("Failed to patch " + transformedName, t);
-		}
-		return originalBytes;
-	}
-
-	public static boolean requiresSrgHook(String transformedName) {
-		return postSrgPatcher.willPatch(transformedName);
-	}
-
 	public static byte[] postSrgTransformationHook(String name, String transformedName, byte[] originalBytes) {
+		LaunchClassLoaderUtil.cacheSrgBytes(transformedName, originalBytes);
 		try {
-			return postSrgPatcher.patch(transformedName, originalBytes);
+			return patcher.patch(transformedName, originalBytes);
 		} catch (Throwable t) {
 			PatcherLog.error("Failed to patch " + transformedName, t);
 		}
