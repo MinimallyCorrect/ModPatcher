@@ -13,7 +13,7 @@ import java.util.*;
 
 public enum LaunchClassLoaderUtil {
 	;
-	public static final String AFTER_TRANSFORMER_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
+	private static final String DEOBF_TRANSFORMER_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
@@ -31,6 +31,21 @@ public enum LaunchClassLoaderUtil {
 		} else {
 			System.setProperty(ALREADY_LOADED_PROPERTY_NAME, "true");
 		}
+	}
+
+	public static void addTransformer(IClassTransformer transformer) {
+		List<IClassTransformer> transformers = LaunchClassLoaderUtil.getTransformers();
+
+		for (int i = 0; i < transformers.size(); i++) {
+			if (transformers.get(i).getClass().getName().equals(LaunchClassLoaderUtil.DEOBF_TRANSFORMER_NAME)) {
+				transformers.add(i + 1, transformer);
+				return;
+			}
+		}
+
+		PatcherLog.warn("Didn't find deobfuscation transformer " + LaunchClassLoaderUtil.DEOBF_TRANSFORMER_NAME + " in transformers list.\n" +
+			"Did you forget to set the SortingIndex for your coremod >= 1001? This message is expected in a deobf environment.");
+		transformers.add(transformer);
 	}
 
 	public static List<IClassTransformer> getTransformers() {
@@ -117,21 +132,12 @@ public enum LaunchClassLoaderUtil {
 		Iterable<IClassTransformer> transformers = getTransformers();
 		for (final IClassTransformer transformer : transformers) {
 			basicClass = runTransformer(name, transformedName, basicClass, transformer);
-			if (transformer.getClass().getName().equals(AFTER_TRANSFORMER_NAME)) {
+			if (transformer.getClass().getName().equals(DEOBF_TRANSFORMER_NAME)) {
 				cachedSrgClasses.put(transformedName, basicClass);
 				return basicClass;
 			}
 		}
 		throw new RuntimeException("No SRG transformer!" + Joiner.on(",\n").join(transformers));
-	}
-
-	public static byte[] getPreSrgBytes(String name) {
-		name = untransformName(name);
-		try {
-			return getClassBytes(name);
-		} catch (Throwable t) {
-			throw new RuntimeException(t);
-		}
 	}
 
 	public static byte[] getSrgBytes(String name) {
@@ -147,6 +153,13 @@ public enum LaunchClassLoaderUtil {
 		} catch (Throwable t) {
 			throw new RuntimeException(t);
 		}
+	}
+
+	public static void cacheSrgBytes(String transformedName, byte[] bytes) {
+		if (cachedSrgClasses.containsKey(transformedName))
+			return;
+
+		cachedSrgClasses.put(transformedName, bytes);
 	}
 
 	public static byte[] getClassBytes(String name) {
