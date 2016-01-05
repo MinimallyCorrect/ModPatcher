@@ -6,10 +6,11 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import java.util.*;
 
 /**
- * Return "me.nallar.modpatcher.ModPatcherSetupClass" in your IFMLLoadingPlugin's getSetupClass
- * if you are using ModPatcher in your own core mod
+ * Set as the setup class for your CoreMod to set up ModPatcher
+ *
+ * <pre><code>@Override public String getSetupClass() { return ModPatcher.getSetupClass(); }</code></pre>
  */
-public class ModPatcherSetupClass implements IFMLCallHook {
+public class ModPatcherSetup implements IFMLCallHook {
 	private static boolean modPatcherInitialised = false;
 
 	@Override
@@ -23,8 +24,10 @@ public class ModPatcherSetupClass implements IFMLCallHook {
 		}
 		modPatcherInitialised = true;
 
+		classLoader.addClassLoaderExclusion("me.nallar.modpatcher");
+		classLoader.addClassLoaderExclusion("javassist");
 		LaunchClassLoaderUtil.instance = classLoader;
-		LaunchClassLoaderUtil.addTransformer(new ModPatcher());
+		LaunchClassLoaderUtil.addTransformer(ModPatcher.getInstance());
 	}
 
 	@Override
