@@ -13,7 +13,7 @@ import java.util.*;
 
 public enum LaunchClassLoaderUtil {
 	;
-	private static final String DEOBF_TRANSFORMER_NAME = "cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer";
+	private static final String DEOBF_TRANSFORMER_NAME = "net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer";
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
