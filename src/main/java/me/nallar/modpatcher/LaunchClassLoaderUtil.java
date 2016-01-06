@@ -125,17 +125,13 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
-		byte[] cached = cachedSrgClasses.get(transformedName);
-		if (cached != null) {
-			return cached;
-		}
 		Iterable<IClassTransformer> transformers = getTransformers();
 		for (final IClassTransformer transformer : transformers) {
-			basicClass = runTransformer(name, transformedName, basicClass, transformer);
-			if (transformer.getClass().getName().equals(DEOBF_TRANSFORMER_NAME)) {
-				cachedSrgClasses.put(transformedName, basicClass);
+			if (transformer == ModPatcher.getInstance()) {
+				cacheSrgBytes(transformedName, basicClass);
 				return basicClass;
 			}
+			basicClass = runTransformer(name, transformedName, basicClass, transformer);
 		}
 		throw new RuntimeException("No SRG transformer!" + Joiner.on(",\n").join(transformers));
 	}
@@ -156,10 +152,9 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static void cacheSrgBytes(String transformedName, byte[] bytes) {
-		if (cachedSrgClasses.containsKey(transformedName))
-			return;
-
-		cachedSrgClasses.put(transformedName, bytes);
+		byte[] old = cachedSrgClasses.put(transformedName, bytes);
+		if (old != null && !Arrays.equals(bytes, old))
+			throw new Error("Inconsistent transformation results. Tried to cache different bytes for class " + transformedName + " to previous result after transformation.");
 	}
 
 	public static byte[] getClassBytes(String name) {

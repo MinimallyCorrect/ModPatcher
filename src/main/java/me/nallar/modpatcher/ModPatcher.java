@@ -10,7 +10,7 @@ import java.io.*;
 import java.nio.file.*;
 
 public class ModPatcher implements IClassTransformer {
-	public static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
+	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
 	private static final Patcher patcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
 	private static final String DUMP_PROPERTY_NAME = "nallar.ModPatcher.dump";
@@ -53,7 +53,7 @@ public class ModPatcher implements IClassTransformer {
 	 * @return Name of the ModPatcher setup class
 	 */
 	public static String getSetupClass() {
-		return "me.nallar.modpatcher.ModPatcherSetupClass";
+		return "me.nallar.modpatcher.ModPatcherSetup";
 	}
 
 	private static void recursivelyAddXmlFiles(File directory, Patcher patcher) {
@@ -98,6 +98,10 @@ public class ModPatcher implements IClassTransformer {
 		}
 	}
 
+	public static IClassTransformer getInstance() {
+		return LazyModPatcherHolder.INSTANCE;
+	}
+
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
 		if (!init) {
@@ -114,5 +118,9 @@ public class ModPatcher implements IClassTransformer {
 			}
 		}
 		return postSrgTransformationHook(name, transformedName, bytes);
+	}
+
+	private static class LazyModPatcherHolder {
+		private static final ModPatcher INSTANCE = new ModPatcher();
 	}
 }
