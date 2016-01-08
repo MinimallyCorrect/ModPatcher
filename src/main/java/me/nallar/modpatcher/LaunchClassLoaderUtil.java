@@ -48,6 +48,7 @@ public enum LaunchClassLoaderUtil {
 		transformers.add(transformer);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<IClassTransformer> getTransformers() {
 		if (transformers != null) {
 			return transformers;
@@ -81,6 +82,7 @@ public enum LaunchClassLoaderUtil {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static Set<String> getClassLoaderExceptions() {
 		if (classLoaderExceptions != null) {
 			return classLoaderExceptions;

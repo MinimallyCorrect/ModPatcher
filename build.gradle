@@ -5,13 +5,22 @@ buildscript {
 			name = "forge"
 			url = "http://files.minecraftforge.net/maven"
 		}
+		maven {
+			name = "nallar"
+			url = "http://repo.nallar.me/"
+		}
 	}
+	configurations.all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+		classpath group: 'me.nallar', name: 'ModPatcherGradle', version: '0.1-SNAPSHOT', changing: true
 	}
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'me.nallar.ModPatcherGradle'
 apply plugin: 'maven'
+
+group = 'me.nallar'
+archivesBaseName = 'modpatcher'
 
 // Extended project information
 ext.projectName = 'ModPatcher'
@@ -30,12 +39,15 @@ minecraft {
 	mappings = "stable_20"
 }
 
+modpatcher {
+	extractGeneratedSources = true
+	generateInheritanceHierarchy = true
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 version = mcVersion + '-SNAPSHOT'
-group = 'me.nallar'
-archivesBaseName = 'modpatcher'
 
 // Define variables
 ext.buildNumber = System.getenv("BUILD_NUMBER") ?: 0
@@ -48,9 +60,7 @@ repositories {
 }
 
 configurations {
-	all {
-		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-	}
+	all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
 	provided
 	compile.extendsFrom provided
 }
@@ -102,17 +112,6 @@ tasks.withType(JavaCompile) {
 	options.compilerArgs += ['-Xlint:all', '-Xlint:-path']
 	options.deprecation = true
 	options.encoding = 'utf8'
-}
-
-import me.nallar.mappingsgenerator.Main;
-
-afterEvaluate {
-	project.tasks.deobfMcMCP.doLast { task ->
-		Main.generateMappings(task.getOutJar())
-	}
-	project.tasks.remapMcSources.doLast { task ->
-		Main.extractGeneratedSources(task.getOutJar())
-	}
 }
 
 jar.manifest.mainAttributes(

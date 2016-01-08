@@ -62,6 +62,7 @@ public class MCPMappings extends Mappings {
 	private Map<String, List<String>> loadExtends(InputStream resourceAsStream) throws IOException {
 		ObjectInputStream objectInputStream = new ObjectInputStream(resourceAsStream);
 		try {
+			@SuppressWarnings("unchecked")
 			Map<String, String> reversed = (Map<String, String>) objectInputStream.readObject();
 			Map<String, List<String>> extendsMap = new HashMap<String, List<String>>();
 			for (Map.Entry<String, String> e : reversed.entrySet()) {
