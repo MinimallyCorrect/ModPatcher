@@ -35,7 +35,6 @@ ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 
 minecraft {
 	version = fullForgeVersion
-	runDir = "eclipse/assets"
 	mappings = "stable_20"
 }
 
@@ -120,5 +119,5 @@ jar.manifest.mainAttributes(
 	"Implementation-Title": name,
 	"Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
 	"Implementation-Vendor": url,
-	"FMLCorePlugin": "me.nallar.modpatcher.CoreMod"
+	"FMLCorePlugin": "me.nallar.modpatcher.coremod.CoreMod"
 )

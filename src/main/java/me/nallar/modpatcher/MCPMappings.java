@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.mappings;
+package me.nallar.modpatcher;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -6,13 +6,12 @@ import me.nallar.javapatcher.mappings.ClassDescription;
 import me.nallar.javapatcher.mappings.FieldDescription;
 import me.nallar.javapatcher.mappings.Mappings;
 import me.nallar.javapatcher.mappings.MethodDescription;
-import me.nallar.modpatcher.PatcherLog;
 
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
-public class MCPMappings extends Mappings {
+class MCPMappings extends Mappings {
 	private static final Pattern classObfuscatePattern = Pattern.compile("\\^class:([^\\^]+)\\^", Pattern.DOTALL | Pattern.MULTILINE);
 	private static final Pattern methodObfuscatePattern = Pattern.compile("\\^method:([^\\^/]+)/([^\\^/]+)\\^", Pattern.DOTALL | Pattern.MULTILINE);
 	private static final Pattern fieldObfuscatePattern = Pattern.compile("\\^field:([^\\^/]+)/([^\\^/]+)\\^", Pattern.DOTALL | Pattern.MULTILINE);

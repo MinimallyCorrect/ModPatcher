@@ -129,7 +129,7 @@ public enum LaunchClassLoaderUtil {
 	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
 		Iterable<IClassTransformer> transformers = getTransformers();
 		for (final IClassTransformer transformer : transformers) {
-			if (transformer == ModPatcher.getInstance()) {
+			if (transformer == ModPatcherTransformer.getInstance()) {
 				cacheSrgBytes(transformedName, basicClass);
 				return basicClass;
 			}

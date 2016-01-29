@@ -17,11 +17,6 @@ public class ClassLoaderPool extends ClassPool {
 	}
 
 	@Override
-	protected void cacheCtClass(String className, CtClass c, boolean dynamic) {
-		super.cacheCtClass(className, c, dynamic);
-	}
-
-	@Override
 	public CtClass getCached(String className) {
 		return super.getCached(className);
 	}
