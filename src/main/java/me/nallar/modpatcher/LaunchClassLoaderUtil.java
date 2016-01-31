@@ -23,6 +23,7 @@ public enum LaunchClassLoaderUtil {
 	private static List<IClassTransformer> transformers;
 	private static IClassNameTransformer renameTransformer;
 	private static Set<String> classLoaderExceptions;
+	private static Set<String> transformerExceptions;
 
 	static {
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
@@ -91,6 +92,20 @@ public enum LaunchClassLoaderUtil {
 			Field f = instance.getClass().getDeclaredField("classLoaderExceptions");
 			f.setAccessible(true);
 			return classLoaderExceptions = (Set<String>) f.get(getInstance());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Set<String> getTransformerExceptions() {
+		if (transformerExceptions != null) {
+			return transformerExceptions;
+		}
+		try {
+			Field f = instance.getClass().getDeclaredField("transformerExceptions");
+			f.setAccessible(true);
+			return transformerExceptions = (Set<String>) f.get(getInstance());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -176,5 +191,23 @@ public enum LaunchClassLoaderUtil {
 
 	public static String untransformName(String name) {
 		return getRenameTransformer().unmapClassName(name);
+	}
+
+	public static void removeRedundantExclusions() {
+		removeRedundantExclusions(getTransformerExceptions());
+		removeRedundantExclusions(getClassLoaderExceptions());
+	}
+
+	private static void removeRedundantExclusions(Set<String> transformerExceptions) {
+		Iterator<String> parts = transformerExceptions.iterator();
+		while (parts.hasNext()) {
+			String part = parts.next();
+
+			for (String part2 : transformerExceptions) {
+				if (!part.equals(part2) && part.startsWith(part2)) {
+					parts.remove();
+				}
+			}
+		}
 	}
 }

@@ -65,7 +65,8 @@ configurations {
 }
 
 dependencies {
-	compile group: 'me.nallar', name: 'javapatcher', version: '1.1-SNAPSHOT', changing: true
+	compile group: 'me.nallar', name: 'javapatcher', version: '1.1', changing: false
+	compile group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
 	compile 'org.javassist:javassist:3.18.2-GA'
 }
 
@@ -107,8 +108,8 @@ processResources {
 }
 
 tasks.withType(JavaCompile) {
-	sourceCompatibility = 6
-	targetCompatibility = 6
+	sourceCompatibility = 8
+	targetCompatibility = 8
 	options.with {
 		encoding = 'UTF-8'
 		compilerArgs << "-Xlint:all"
