@@ -95,16 +95,12 @@ processResources {
 	inputs.property "version", project.version
 	inputs.property "mcversion", project.minecraft.version
 
-	// replace stuff in mcmod.info, nothing else
-	from(sourceSets.main.resources.srcDirs) {
-		include 'mcmod.info'
-
-		// replace version and mcversion
+	filesMatching("mcmod.info") {
 		expand 'version': project.version, 'mcversion': project.minecraft.version, 'name': project.projectName
 	}
-
-	// copy everything else, thats not the mcmod.info
-	from(sourceSets.main.resources.srcDirs) { exclude 'mcmod.info' }
+	filesMatching("modpatcher.version") {
+		expand 'version': project.version
+	}
 }
 
 tasks.withType(JavaCompile) {
@@ -140,19 +136,9 @@ coremodJar apiJarConfig
 coremodJar {
 	classifier = 'coremod'
 	include 'me/nallar/modpatcher/coremod/*'
+	include 'mcmod.info'
+	include '*.example'
 }
-
-/*
-TODO: Should we have these artifacts too?
-task javadocJar(type: Jar, dependsOn: javadoc) {
-	classifier = 'javadoc'
-	from javadoc.destinationDir
-}
-artifacts {
-	archives sourceJar
-	archives javadocJar
-}
-*/
 
 artifacts {
 	archives apiJar
