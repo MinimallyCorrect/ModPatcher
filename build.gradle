@@ -38,11 +38,20 @@ ext.buildNumber = System.getenv("BUILD_NUMBER") ?: 0
 ext.ciSystem = System.getenv("JENKINS_URL") ? 'Jenkins' : 'unknown'
 ext.commit = System.getenv("GIT_COMMIT") ?: 'unknown'
 
+// version information
+version = mcVersion + '-SNAPSHOT'
+
+ext.versionWithBuildNumber = project.buildNumber != 0 ? project.version.replace("-SNAPSHOT", "") + "." + project.buildNumber : project.version
+ext.versionPath = "./build/version.txt"
+
+def versionFile = file(versionPath);
+versionFile.getParentFile().mkdir()
+
 minecraft {
 	version = fullForgeVersion
 	mappings = "stable_20"
 
-	replace "@VERSION@", project.buildNumber != 0 ? (project.version.replace("-SNAPSHOT", "") + '.' + project.buildNumber) : project.version
+	replace "@VERSION@", project.versionWithBuildNumber
 	replace "@MC_VERSION@", version
 }
 
@@ -53,8 +62,6 @@ modpatcher {
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-version = mcVersion + '-SNAPSHOT'
 
 repositories {
 	mavenCentral()
@@ -98,6 +105,8 @@ processResources {
 	// this will ensure that this task is redone when the versions change.
 	inputs.property "version", project.version
 	inputs.property "mcversion", project.minecraft.version
+	println(project.versionWithBuildNumber)
+	versionFile.text = project.versionWithBuildNumber
 
 	filesMatching("mcmod.info") {
 		expand 'version': project.version, 'mcversion': project.minecraft.version, 'name': project.projectName
@@ -148,6 +157,7 @@ artifacts {
 	archives apiJar
 	archives coremodJar
 	archives jar
+	archives file(versionPath)
 }
 
 tasks.withType(Jar) {
