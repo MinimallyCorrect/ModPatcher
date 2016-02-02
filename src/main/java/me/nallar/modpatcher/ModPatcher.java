@@ -1,17 +1,87 @@
 package me.nallar.modpatcher;
 
 import me.nallar.javapatcher.patcher.Patcher;
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
+import java.io.*;
+import java.lang.reflect.*;
+import java.net.*;
 import java.nio.file.*;
 
 /**
+ * ModPatcher API
  *
+ * This class is the public facing API of ModPatcher
  */
 public class ModPatcher {
+	private static final String modPatcherDownloadUrl = "https://modpatcher.nallar.me/ModPatcher-lib.jar";
+	private static Path modPatcherPath = Paths.get("./libs/me/nallar/modpatcher/ModPatcher-lib.jar").toAbsolutePath();
+
 	static {
-		if (ModPatcherTransformer.class.getClassLoader().getClass().getName().contains("LaunchClassLoader")) {
+		try {
+			checkClassLoading();
+		} catch (NoClassDefFoundError e) {
+			loadModPatcher();
+		}
+	}
+
+	private static void loadModPatcher() {
+		downloadIfNeeded();
+
+		addToCurrentClassLoader();
+
+		checkClassLoading();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void addToCurrentClassLoader() {
+		ClassLoader cl = ModPatcher.class.getClassLoader();
+
+		LaunchClassLoader lcl = null;
+		if (cl instanceof LaunchClassLoader) {
+			lcl = (LaunchClassLoader) cl;
+			cl = ReflectionHelper.<ClassLoader, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "parent");
+			lcl.addClassLoaderExclusion("me.nallar.modpatcher");
+		}
+
+		try {
+			Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+			method.setAccessible(true);
+			method.invoke(cl, modPatcherPath.toUri().toURL());
+		} catch (Exception e) {
+			throw new Error(e);
+		}
+
+		ModPatcherLoadHook.loadedAfterDownload(lcl);
+	}
+
+	private static void downloadIfNeeded() {
+		if (!Files.exists(modPatcherPath))
+			download();
+	}
+
+	private static void download() {
+		try (InputStream in = new URL(modPatcherDownloadUrl).openConnection().getInputStream()) {
+			Files.copy(in, modPatcherPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void checkClassLoading() {
+		if (ModPatcherLoadHook.class.getClassLoader().getClass().getName().contains("LaunchClassLoader")) {
 			throw new Error("ModPatcher not be loaded under LaunchClassLoader");
 		}
+	}
+
+	/**
+	 * Ensures that ModPatcher is at least the given version. Triggers auto-updating if not.
+	 *
+	 * @param version minimum required version
+	 */
+	public static void ensureVersion(String version) {
+		ModPatcherLoadHook.ensureVersion(version);
 	}
 
 	/**
@@ -67,4 +137,5 @@ public class ModPatcher {
 	public static String getDefaultPatchesDirectory() {
 		return ModPatcherTransformer.getDefaultPatchesDirectory();
 	}
+
 }

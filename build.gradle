@@ -36,6 +36,9 @@ ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 minecraft {
 	version = fullForgeVersion
 	mappings = "stable_20"
+
+	replace "@VERSION@", project.version
+	replace "@MC_VERSION@", version
 }
 
 modpatcher {
