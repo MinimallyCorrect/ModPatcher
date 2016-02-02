@@ -40,7 +40,7 @@ public class CoreMod implements IFMLLoadingPlugin {
 
 	@Override
 	public String getSetupClass() {
-		return ModPatcher.getSetupClass();
+		return ModPatcher.getSetupClass("latest", "beta");
 	}
 
 	@Override
