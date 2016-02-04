@@ -119,19 +119,7 @@ class ModPatcherTransformer {
 		return MOD_PATCHES_DIRECTORY;
 	}
 
-	public static void loadMixins(Class<?> mixinClass) {
-		getMixinApplicator().addSource(mixinClass);
-	}
-
-	public static void loadMixins(Path path, String packageName) {
-		getMixinApplicator().addSource(path, packageName);
-	}
-
-	public static void loadMixins(Path path) {
-		getMixinApplicator().addSource(path);
-	}
-
-	private static MixinApplicator getMixinApplicator() {
+	static MixinApplicator getMixinApplicator() {
 		if (mixinApplicator == null)
 			mixinApplicator = new MixinApplicator();
 

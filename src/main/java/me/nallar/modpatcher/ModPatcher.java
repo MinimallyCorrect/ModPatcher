@@ -91,13 +91,14 @@ public class ModPatcher {
 	}
 
 	/**
-	 * Loads mixins from the package which the given class is in
+	 * Loads mixins from the given package.
+	 * The package must have a package-info.java with @Mixin annotation
 	 *
-	 * @param mixinClass Class to load mixins from package of
+	 * @param mixinPackage Package to load mixins from
 	 */
-	public static void loadMixins(Class<?> mixinClass) {
+	public static void loadMixins(String mixinPackage) {
 		checkClassLoading();
-		ModPatcherTransformer.loadMixins(mixinClass);
+		ModPatcherTransformer.getMixinApplicator().addSource(mixinPackage);
 	}
 
 	/**
@@ -107,7 +108,7 @@ public class ModPatcher {
 	 */
 	public static void loadMixins(Path path) {
 		checkClassLoading();
-		ModPatcherTransformer.loadMixins(path);
+		ModPatcherTransformer.getMixinApplicator().addSource(path);
 	}
 
 	/**
@@ -117,7 +118,7 @@ public class ModPatcher {
 	 */
 	public static void loadMixins(Path path, String packageName) {
 		checkClassLoading();
-		ModPatcherTransformer.loadMixins(path, packageName);
+		ModPatcherTransformer.getMixinApplicator().addSource(path, packageName);
 	}
 
 	/**
