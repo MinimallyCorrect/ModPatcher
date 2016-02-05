@@ -160,6 +160,16 @@ artifacts {
 	archives file(versionPath)
 }
 
+def installer = install.repositories.mavenInstaller
+
+[installer]*.pom*.whenConfigured {
+	p ->
+		p.dependencies = p.dependencies.findAll {
+			dep -> dep.artifactId == "junit"
+		}
+}
+
+
 tasks.withType(Jar) {
 	baseName = project.name
 	manifest.mainAttributes(
