@@ -60,7 +60,7 @@ configurations {
 }
 
 dependencies {
-	compile group: 'me.nallar', name: 'javapatcher', version: '1.2', changing: false
+	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.2', changing: false
 	compile 'org.javassist:javassist:3.18.2-GA'
 }
 
