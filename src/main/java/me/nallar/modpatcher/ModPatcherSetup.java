@@ -25,7 +25,7 @@ public class ModPatcherSetup implements IFMLCallHook {
 		modPatcherInitialised = true;
 
 		classLoader.addTransformerExclusion("me.nallar.modpatcher");
-		classLoader.addClassLoaderExclusion("javassist");
+		classLoader.addTransformerExclusion("javassist");
 		LaunchClassLoaderUtil.instance = classLoader;
 		LaunchClassLoaderUtil.addTransformer(ModPatcher.getInstance());
 	}
