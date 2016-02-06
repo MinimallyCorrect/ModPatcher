@@ -39,7 +39,7 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 version = mcVersion + '-SNAPSHOT'
 group = 'me.nallar'
-archivesBaseName = 'modpatcher'
+archivesBaseName = 'ModPatcher'
 
 // Define variables
 ext.buildNumber = System.getenv("BUILD_NUMBER") ?: 0
@@ -60,7 +60,7 @@ configurations {
 }
 
 dependencies {
-	compile group: 'me.nallar', name: 'javapatcher', version: '1.1-SNAPSHOT', changing: true
+	compile group: 'me.nallar', name: 'javapatcher', version: '1.2', changing: false
 	compile 'org.javassist:javassist:3.18.2-GA'
 }
 
