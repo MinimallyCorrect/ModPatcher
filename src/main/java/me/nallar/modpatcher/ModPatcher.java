@@ -216,7 +216,7 @@ public class ModPatcher {
 			Files.deleteIfExists(modPatcherPath);
 			Files.copy(in, modPatcherPath);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Failed to download ModPatcher", e);
 		}
 	}
 
