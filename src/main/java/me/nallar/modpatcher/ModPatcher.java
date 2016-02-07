@@ -32,6 +32,12 @@ public class ModPatcher {
 	private static final Path neverUpdatePath = Paths.get("./libs/ModPatcher/NEVER_UPDATE.txt").toAbsolutePath();
 	private static final Path modPatcherPath = Paths.get("./libs/ModPatcher/ModPatcher-lib.jar").toAbsolutePath();
 	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!Files.exists(modPatcherPath));
+	private static final String DOWNLOAD_URL_PROPERTY = "modpatcher.downloadUrl";
+	private static final String REQUIRED_VERSION_PROPERTY = "modpatcher.requiredVersion";
+	private static final String RELEASE_PROPERTY = "modpatcher.release";
+	private static final String VERSION_URL_PROPERTY = "modpatcher.versionUrl";
+	private static final String NEVER_UPDATE_PROPERTY = "modpatcher.neverUpdate";
+	private static final String DEFAULT_RELEASE = "stable";
 	private static String modPatcherRelease;
 	private static Future<Boolean> updateRequired = defaultUpdateRequired;
 	private static Version requiredVersion;
@@ -64,26 +70,7 @@ public class ModPatcher {
 	 * @return Name of the ModPatcher setup class
 	 */
 	public static String getSetupClass(String versionString, String release) {
-		if (versionString != null || release != null) {
-			if (updateRequired == null) {
-				throw new Error("Modpatcher has already been loaded, it is too late to call getSetupClass");
-			}
-			if (release != null) {
-				if (modPatcherRelease == null) {
-					modPatcherRelease = release;
-					startVersionCheck();
-				} else {
-					log.warn("Conflicting ModPatcher release requests. Set to " + modPatcherRelease + ", requested: " + release);
-				}
-			}
-			if (versionString != null) {
-				Version requested = Version.of(versionString);
-				if (requested.compareTo(requiredVersion) > 0) {
-					requiredVersion = requested;
-					startVersionCheck();
-				}
-			}
-		}
+		requireVersion(versionString, release);
 
 		return "me.nallar.modpatcher.ModPatcherSetup";
 	}
@@ -109,8 +96,8 @@ public class ModPatcher {
 	/**
 	 * Gets the JavaPatcher Patcher instance
 	 *
-	 * @deprecated Use specific methods such as loadPatches(InputStream)
 	 * @return the Patcher
+	 * @deprecated Use specific methods such as loadPatches(InputStream)
 	 */
 	@Deprecated
 	public static Patcher getPatcher() {
@@ -159,6 +146,39 @@ public class ModPatcher {
 		return ModPatcherTransformer.getDefaultPatchesDirectory();
 	}
 
+	private static void requireVersion(String versionString, String release) {
+		if (updateRequired == null)
+			throw new Error("Modpatcher has already been loaded, it is too late to call getSetupClass");
+
+		versionString = System.getProperty(REQUIRED_VERSION_PROPERTY, versionString);
+		release = System.getProperty(RELEASE_PROPERTY, release);
+
+		if (release != null && versionString == null)
+			throw new IllegalArgumentException("versionString must be non-null if release is non-null");
+
+		boolean startCheck = false;
+
+		if (release != null) {
+			if (modPatcherRelease == null) {
+				modPatcherRelease = release;
+				startCheck = true;
+			} else {
+				log.warn("Conflicting ModPatcher release requests. Set to " + modPatcherRelease + ", requested: " + release);
+			}
+		}
+
+		if (versionString != null) {
+			Version requested = Version.of(versionString);
+			if (requested.compareTo(requiredVersion) > 0) {
+				requiredVersion = requested;
+				startCheck = true;
+			}
+		}
+
+		if (startCheck)
+			startVersionCheck();
+	}
+
 	private static void loadModPatcher() {
 		download();
 
@@ -170,7 +190,7 @@ public class ModPatcher {
 	}
 
 	private static String getModPatcherRelease() {
-		return mcVersion + '-' + System.getProperty("modpatcher.release", modPatcherRelease == null ? "stable" : modPatcherRelease);
+		return mcVersion + '-' + (modPatcherRelease == null ? DEFAULT_RELEASE : modPatcherRelease);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -193,7 +213,7 @@ public class ModPatcher {
 	}
 
 	static boolean neverUpdate() {
-		return "true".equals(System.getProperty("modPatcher.neverUpdate")) || Files.exists(neverUpdatePath);
+		return "true".equals(System.getProperty(NEVER_UPDATE_PROPERTY)) || Files.exists(neverUpdatePath);
 	}
 
 	private static boolean isDownloadNeeded() {
@@ -212,7 +232,7 @@ public class ModPatcher {
 		if (!isDownloadNeeded())
 			return;
 
-		try (InputStream in = new URL(System.getProperty("modpatcher.downloadUrl", "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/ModPatcher-lib.jar")).openConnection().getInputStream()) {
+		try (InputStream in = new URL(System.getProperty(DOWNLOAD_URL_PROPERTY, "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/ModPatcher-lib.jar")).openConnection().getInputStream()) {
 			Files.deleteIfExists(modPatcherPath);
 			Files.copy(in, modPatcherPath);
 		} catch (IOException e) {
@@ -236,7 +256,7 @@ public class ModPatcher {
 	}
 
 	private static void startVersionCheck() {
-		if (neverUpdate())
+		if (neverUpdate() || requiredVersion == null)
 			return;
 
 		updateRequired.cancel(true);
@@ -247,7 +267,7 @@ public class ModPatcher {
 					Version current = getLastVersion();
 					if (requiredVersion.newerThan(current)) {
 						try {
-							Version online = new Version(Resources.toString(new URL(System.getProperty("modpatcher.versionUrl", "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/version.txt")), Charsets.UTF_8).trim());
+							Version online = new Version(Resources.toString(new URL(System.getProperty(VERSION_URL_PROPERTY, "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/version.txt")), Charsets.UTF_8).trim());
 							return online.compareTo(current) > 0;
 						} catch (InterruptedIOException ignored) {
 						} catch (Throwable t) {
