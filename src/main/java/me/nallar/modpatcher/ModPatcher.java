@@ -247,7 +247,7 @@ public class ModPatcher {
 					Version current = getLastVersion();
 					if (requiredVersion.newerThan(current)) {
 						try {
-							Version online = new Version(Resources.toString(new URL(System.getProperty("modpatcher.versionUrl", "https://modpatcher.nallar.me/" + getModPatcherRelease() + "latest-version.txt")), Charsets.UTF_8).trim());
+							Version online = new Version(Resources.toString(new URL(System.getProperty("modpatcher.versionUrl", "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/version.txt")), Charsets.UTF_8).trim());
 							return online.compareTo(current) > 0;
 						} catch (InterruptedIOException ignored) {
 						} catch (Throwable t) {
