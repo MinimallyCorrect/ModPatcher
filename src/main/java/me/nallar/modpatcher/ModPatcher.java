@@ -203,13 +203,18 @@ public class ModPatcher {
 
 			if (cl instanceof LaunchClassLoader) {
 				LaunchClassLoader lcl = (LaunchClassLoader) cl;
-				lcl.addTransformerExclusion("me.nallar.modpatcher");
+				final String package_ = "me.nallar.modpatcher";
+				lcl.addTransformerExclusion(package_);
 				method = LaunchClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				Set<String> invalidClasses = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
-				invalidClasses.removeIf(it -> it.contains("nallar"));
+				Set<String> negativeResources = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
+				invalidClasses.removeIf(it -> it.startsWith(package_));
+				negativeResources.removeIf(it -> it.startsWith(package_));
 			}
 			method.setAccessible(true);
-			method.invoke(cl, modPatcherPath.toUri().toURL());
+			final URL url = modPatcherPath.toUri().toURL();
+			log.info("Added " + url + " to LCL");
+			method.invoke(cl, url);
 		} catch (Exception e) {
 			throw new Error(e);
 		}
