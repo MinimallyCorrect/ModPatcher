@@ -179,7 +179,7 @@ public class ModPatcher {
 		ClassLoader cl = ModPatcher.class.getClassLoader();
 
 		if (cl instanceof LaunchClassLoader) {
-			if (System.getProperty("modpatcher.allowLoadingUnderLCL").equals("true")) {
+			if ("true".equals(System.getProperty("modpatcher.allowLoadingUnderLCL"))) {
 				LaunchClassLoader lcl = (LaunchClassLoader) cl;
 				cl = ReflectionHelper.<ClassLoader, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "parent");
 				lcl.addClassLoaderExclusion("me.nallar.modpatcher");
