@@ -76,7 +76,7 @@ configurations {
 
 dependencies {
 	testCompile 'junit:junit:4.12'
-	compile group: 'me.nallar', name: 'javapatcher', version: '1.1', changing: false
+	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.2', changing: false
 	compile group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
 	compile 'org.javassist:javassist:3.18.2-GA'
 }
