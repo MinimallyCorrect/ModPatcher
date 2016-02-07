@@ -234,6 +234,7 @@ public class ModPatcher {
 
 		try (InputStream in = new URL(System.getProperty(DOWNLOAD_URL_PROPERTY, "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/ModPatcher-lib.jar")).openConnection().getInputStream()) {
 			Files.deleteIfExists(modPatcherPath);
+			Files.createDirectories(modPatcherPath.getParent());
 			Files.copy(in, modPatcherPath);
 		} catch (IOException e) {
 			log.error("Failed to download ModPatcher", e);
