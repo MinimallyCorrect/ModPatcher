@@ -159,7 +159,6 @@ public class ModPatcher {
 		return ModPatcherTransformer.getDefaultPatchesDirectory();
 	}
 
-
 	private static void loadModPatcher() {
 		download();
 
@@ -167,7 +166,7 @@ public class ModPatcher {
 
 		addToCurrentClassLoader();
 
-		checkClassLoading();
+		checkClassLoading(false);
 	}
 
 	private static String getModPatcherRelease() {
