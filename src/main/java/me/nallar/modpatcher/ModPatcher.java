@@ -26,6 +26,7 @@ import java.util.concurrent.*;
  * This behaviour can be disabled by creating the file "libs/modpatcher/NEVER_UPDATE.txt"
  */
 public class ModPatcher {
+	private static final int API_VERSION = 0;
 	private static final Logger log = LogManager.getLogger("ModPatcher");
 	private static final String mcVersion = "@MC_VERSION@";
 	private static final Path neverUpdatePath = Paths.get("./libs/ModPatcher/NEVER_UPDATE.txt").toAbsolutePath();
@@ -194,11 +195,9 @@ public class ModPatcher {
 		} catch (Exception e) {
 			throw new Error(e);
 		}
-
-		ModPatcherLoadHook.loadHook(requiredVersion, getModPatcherRelease());
 	}
 
-	private static boolean neverUpdate() {
+	static boolean neverUpdate() {
 		return "true".equals(System.getProperty("modPatcher.neverUpdate")) || Files.exists(neverUpdatePath);
 	}
 
@@ -227,9 +226,16 @@ public class ModPatcher {
 	}
 
 	private static void checkClassLoading() {
+		checkClassLoading(true);
+	}
+
+	private static void checkClassLoading(boolean load) {
 		try {
-			ModPatcherLoadHook.class.getName();
+			ModPatcherLoadHook.loadHook(requiredVersion, getModPatcherRelease(), API_VERSION);
 		} catch (NoClassDefFoundError e) {
+			if (!load)
+				throw e;
+
 			loadModPatcher();
 		}
 	}
