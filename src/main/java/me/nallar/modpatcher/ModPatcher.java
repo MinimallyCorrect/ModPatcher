@@ -88,11 +88,32 @@ public class ModPatcher {
 	}
 
 	/**
+	 * Load JavaPatcher patches
+	 *
+	 * @param inputStream stream to load patches from
+	 */
+	public static void loadPatches(InputStream inputStream) {
+		getPatcher().loadPatches(inputStream);
+	}
+
+	/**
+	 * Load JavaPatcher patches
+	 *
+	 * @param patches String to load patches from
+	 */
+	public static void loadPatches(String patches) {
+		getPatcher().loadPatches(patches);
+	}
+
+	/**
 	 * Gets the JavaPatcher Patcher instance
 	 *
+	 * @deprecated Use specific methods such as loadPatches(InputStream)
 	 * @return the Patcher
 	 */
+	@Deprecated
 	public static Patcher getPatcher() {
+		checkClassLoading();
 		return ModPatcherTransformer.getPatcher();
 	}
 
