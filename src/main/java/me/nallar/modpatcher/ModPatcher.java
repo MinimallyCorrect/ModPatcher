@@ -31,7 +31,7 @@ public class ModPatcher {
 	private static final String mcVersion = "@MC_VERSION@";
 	private static final Path neverUpdatePath = Paths.get("./libs/ModPatcher/NEVER_UPDATE.txt").toAbsolutePath();
 	private static final Path modPatcherPath = Paths.get("./libs/ModPatcher/ModPatcher-lib.jar").toAbsolutePath();
-	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(Files.exists(modPatcherPath));
+	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!Files.exists(modPatcherPath));
 	private static String modPatcherRelease;
 	private static Future<Boolean> updateRequired = defaultUpdateRequired;
 	private static Version requiredVersion;
