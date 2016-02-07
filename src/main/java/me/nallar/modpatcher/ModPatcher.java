@@ -206,7 +206,7 @@ public class ModPatcher {
 				lcl.addTransformerExclusion("me.nallar.modpatcher");
 				method = LaunchClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				Set<String> invalidClasses = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
-				invalidClasses.removeIf(it -> it.startsWith("me.nallar."));
+				invalidClasses.removeIf(it -> it.contains("nallar"));
 			}
 			method.setAccessible(true);
 			method.invoke(cl, modPatcherPath.toUri().toURL());
