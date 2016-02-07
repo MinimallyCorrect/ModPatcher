@@ -105,10 +105,10 @@ class ModPatcherTransformer {
 
 		classLoaderInitialised = true;
 
-		classLoader.addClassLoaderExclusion("me.nallar.");
-		classLoader.addClassLoaderExclusion("nallar.");
-		classLoader.addClassLoaderExclusion("javassist.");
-		classLoader.addClassLoaderExclusion("com.github.javaparser.");
+		classLoader.addTransformerExclusion("me.nallar.");
+		classLoader.addTransformerExclusion("nallar.");
+		classLoader.addTransformerExclusion("javassist.");
+		classLoader.addTransformerExclusion("com.github.javaparser.");
 
 		LaunchClassLoaderUtil.instance = classLoader;
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());

@@ -19,11 +19,17 @@ import java.util.concurrent.*;
  * ModPatcher API
  *
  * This class is the public facing API of ModPatcher
+ *
+ * It automatically downloads ModPatcher if the file is missing from the libs folder, or a coremod depends on
+ * a newer version of modpatcher than the installed version
+ *
+ * This behaviour can be disabled by creating the file "libs/modpatcher/NEVER_UPDATE.txt"
  */
 public class ModPatcher {
 	private static final Logger log = LogManager.getLogger("ModPatcher");
 	private static final String mcVersion = "@MC_VERSION@";
-	private static final Path modPatcherPath = Paths.get("./libs/me/nallar/modpatcher/ModPatcher-lib.jar").toAbsolutePath();
+	private static final Path neverUpdatePath = Paths.get("./libs/ModPatcher/NEVER_UPDATE.txt").toAbsolutePath();
+	private static final Path modPatcherPath = Paths.get("./libs/ModPatcher/ModPatcher-lib.jar").toAbsolutePath();
 	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(Files.exists(modPatcherPath));
 	private static String modPatcherRelease;
 	private static Future<Boolean> updateRequired = defaultUpdateRequired;
@@ -171,7 +177,14 @@ public class ModPatcher {
 		ModPatcherLoadHook.loadHook(requiredVersion, getModPatcherRelease());
 	}
 
+	private static boolean neverUpdate() {
+		return "true".equals(System.getProperty("modPatcher.neverUpdate")) || Files.exists(neverUpdatePath);
+	}
+
 	private static boolean isDownloadNeeded() {
+		if (neverUpdate())
+			return false;
+
 		try {
 			return updateRequired.get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -201,6 +214,9 @@ public class ModPatcher {
 	}
 
 	private static void startVersionCheck() {
+		if (neverUpdate())
+			return;
+
 		updateRequired.cancel(true);
 
 		try {
