@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import me.nallar.javapatcher.patcher.Patcher;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +13,7 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -203,6 +205,8 @@ public class ModPatcher {
 				LaunchClassLoader lcl = (LaunchClassLoader) cl;
 				lcl.addTransformerExclusion("me.nallar.modpatcher");
 				method = LaunchClassLoader.class.getDeclaredMethod("addURL", URL.class);
+				Set<String> invalidClasses = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
+				invalidClasses.removeIf(it -> it.startsWith("me.nallar."));
 			}
 			method.setAccessible(true);
 			method.invoke(cl, modPatcherPath.toUri().toURL());
