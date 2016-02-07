@@ -179,13 +179,9 @@ public class ModPatcher {
 		ClassLoader cl = ModPatcher.class.getClassLoader();
 
 		if (cl instanceof LaunchClassLoader) {
-			if ("true".equals(System.getProperty("modpatcher.allowLoadingUnderLCL"))) {
-				LaunchClassLoader lcl = (LaunchClassLoader) cl;
-				cl = ReflectionHelper.<ClassLoader, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "parent");
-				lcl.addClassLoaderExclusion("me.nallar.modpatcher");
-			} else {
-				throw new Error("Can't load ModPatcher under LaunchClassLoader");
-			}
+			LaunchClassLoader lcl = (LaunchClassLoader) cl;
+			cl = ReflectionHelper.<ClassLoader, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "parent");
+			lcl.addTransformerExclusion("me.nallar.modpatcher");
 		}
 
 		try {
