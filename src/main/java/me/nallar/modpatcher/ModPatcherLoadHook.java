@@ -7,6 +7,8 @@ class ModPatcherLoadHook {
 	private static final String VERSION = "@VERSION@".replace("-SNAPSHOT", "");
 
 	static void loadHook(ModPatcher.Version requiredVersion, String modPatcherRelease, int apiVersion) {
+		PatcherLog.trace("Loaded ModPatcher", new Throwable());
+
 		if (ModPatcherLoadHook.class.getClassLoader().getClass().getName().contains("LaunchClassLoader")) {
 			throw new Error("ModPatcher should not be loaded under LaunchClassLoader");
 		}
