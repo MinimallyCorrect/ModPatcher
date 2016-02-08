@@ -39,6 +39,7 @@ public class ModPatcher {
 	private static final String VERSION_URL_PROPERTY = "modpatcher.versionUrl";
 	private static final String NEVER_UPDATE_PROPERTY = "modpatcher.neverUpdate";
 	private static final String DEFAULT_RELEASE = "stable";
+	private static final String MODPATCHER_PACKAGE = "me.nallar.modpatcher";
 	private static String modPatcherRelease;
 	private static Future<Boolean> updateRequired = defaultUpdateRequired;
 	private static Version requiredVersion;
@@ -212,14 +213,15 @@ public class ModPatcher {
 			log.info("Adding " + url + " to LCL");
 			if (cl instanceof LaunchClassLoader) {
 				LaunchClassLoader lcl = (LaunchClassLoader) cl;
-				final String package_ = "me.nallar.modpatcher";
-				lcl.addTransformerExclusion(package_);
+				lcl.addTransformerExclusion(MODPATCHER_PACKAGE);
 				lcl.addURL(url);
 
 				Set<String> invalidClasses = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
 				Set<String> negativeResources = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
-				invalidClasses.removeIf(it -> it.startsWith(package_));
-				negativeResources.removeIf(it -> it.startsWith(package_));
+				invalidClasses.removeIf(ModPatcher::removeModPatcherEntries);
+				negativeResources.removeIf(ModPatcher::removeModPatcherEntries);
+
+				lcl.findClass("me.nallar.modpatcher.ModPatcherLoadHook");
 			} else {
 				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
@@ -228,6 +230,12 @@ public class ModPatcher {
 		} catch (Exception e) {
 			throw new Error(e);
 		}
+	}
+
+	private static boolean removeModPatcherEntries(String entry) {
+		log.trace("Entry: " + entry);
+
+		return entry.startsWith(MODPATCHER_PACKAGE);
 	}
 
 	static boolean neverUpdate() {
