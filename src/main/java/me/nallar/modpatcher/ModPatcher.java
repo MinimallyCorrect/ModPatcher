@@ -214,11 +214,12 @@ public class ModPatcher {
 				LaunchClassLoader lcl = (LaunchClassLoader) cl;
 				final String package_ = "me.nallar.modpatcher";
 				lcl.addTransformerExclusion(package_);
+				lcl.addURL(url);
+
 				Set<String> invalidClasses = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
 				Set<String> negativeResources = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
 				invalidClasses.removeIf(it -> it.startsWith(package_));
 				negativeResources.removeIf(it -> it.startsWith(package_));
-				lcl.addURL(url);
 			} else {
 				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
