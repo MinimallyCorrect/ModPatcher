@@ -221,7 +221,7 @@ public class ModPatcher {
 				invalidClasses.removeIf(ModPatcher::removeModPatcherEntries);
 				negativeResources.removeIf(ModPatcher::removeModPatcherEntries);
 
-				lcl.findClass("me.nallar.modpatcher.ModPatcherLoadHook");
+				log.trace("Loaded class: " + lcl.findClass("me.nallar.modpatcher.ModPatcherLoadHook"));
 			} else {
 				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
