@@ -9,10 +9,6 @@ class ModPatcherLoadHook {
 	static void loadHook(ModPatcher.Version requiredVersion, String modPatcherRelease, int apiVersion) {
 		PatcherLog.trace("Loaded ModPatcher", new Throwable());
 
-		if (ModPatcherLoadHook.class.getClassLoader().getClass().getName().contains("LaunchClassLoader")) {
-			throw new Error("ModPatcher should not be loaded under LaunchClassLoader");
-		}
-
 		if (API_VERSION != apiVersion) {
 			PatcherLog.warn("API version mismatch. Expected " + API_VERSION + ", got " + apiVersion);
 			PatcherLog.warn("API was loaded from: " + JavaTransformer.pathFromClass(ModPatcher.class));
