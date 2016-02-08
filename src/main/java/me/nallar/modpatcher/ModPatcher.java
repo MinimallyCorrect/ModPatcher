@@ -30,8 +30,8 @@ public class ModPatcher {
 	private static final int API_VERSION = 0;
 	private static final Logger log = LogManager.getLogger("ModPatcher");
 	private static final String mcVersion = "@MC_VERSION@";
-	private static final Path neverUpdatePath = realPath("ModPatcher/NEVER_UPDATE.txt");
-	private static final Path modPatcherPath = realPath("ModPatcher/ModPatcher.jar");
+	private static final Path neverUpdatePath = realPath("mods/ModPatcher_NEVER_UPDATE.txt");
+	private static final Path modPatcherPath = realPath("mods/ModPatcher.jlib");
 	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!Files.exists(modPatcherPath));
 	private static final String DOWNLOAD_URL_PROPERTY = "modpatcher.downloadUrl";
 	private static final String REQUIRED_VERSION_PROPERTY = "modpatcher.requiredVersion";
@@ -210,7 +210,7 @@ public class ModPatcher {
 
 		try {
 			final URL url = modPatcherPath.toUri().toURL();
-			log.info("Adding " + url + " to LCL");
+			log.trace("Adding " + url + " to classloader");
 			if (cl instanceof LaunchClassLoader) {
 				LaunchClassLoader lcl = (LaunchClassLoader) cl;
 				lcl.addTransformerExclusion(MODPATCHER_PACKAGE);
@@ -233,8 +233,6 @@ public class ModPatcher {
 	}
 
 	private static boolean removeModPatcherEntries(String entry) {
-		log.trace("Entry: " + entry);
-
 		return entry.replace('/', '.').startsWith(MODPATCHER_PACKAGE);
 	}
 
