@@ -235,7 +235,7 @@ public class ModPatcher {
 	private static boolean removeModPatcherEntries(String entry) {
 		log.trace("Entry: " + entry);
 
-		return entry.startsWith(MODPATCHER_PACKAGE);
+		return entry.replace('/', '.').startsWith(MODPATCHER_PACKAGE);
 	}
 
 	static boolean neverUpdate() {
