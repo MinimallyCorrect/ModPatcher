@@ -221,7 +221,7 @@ public class ModPatcher {
 				invalidClasses.removeIf(ModPatcher::removeModPatcherEntries);
 				negativeResources.removeIf(ModPatcher::removeModPatcherEntries);
 
-				log.trace("Loaded class: " + lcl.findClass("me.nallar.modpatcher.ModPatcherLoadHook"));
+				log.trace("Loaded class: " + Class.forName(MODPATCHER_PACKAGE + ".ModPatcherLoadHook"));
 			} else {
 				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
@@ -273,10 +273,11 @@ public class ModPatcher {
 
 	private static void checkClassLoading(boolean load) {
 		try {
+			Class.forName(MODPATCHER_PACKAGE + ".ModPatcherLoadHook");
 			ModPatcherLoadHook.loadHook(requiredVersion, getModPatcherRelease(), API_VERSION);
-		} catch (NoClassDefFoundError e) {
+		} catch (ClassNotFoundException | NoClassDefFoundError e) {
 			if (!load)
-				throw e;
+				throw new Error(e);
 
 			loadModPatcher();
 		}
