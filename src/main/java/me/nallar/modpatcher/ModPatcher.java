@@ -30,8 +30,8 @@ public class ModPatcher {
 	private static final int API_VERSION = 0;
 	private static final Logger log = LogManager.getLogger("ModPatcher");
 	private static final String mcVersion = "@MC_VERSION@";
-	private static final Path neverUpdatePath = realPath("./ModPatcher/NEVER_UPDATE.txt");
-	private static final Path modPatcherPath = realPath("./ModPatcher/ModPatcher.jar");
+	private static final Path neverUpdatePath = realPath("ModPatcher/NEVER_UPDATE.txt");
+	private static final Path modPatcherPath = realPath("ModPatcher/ModPatcher.jar");
 	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!Files.exists(modPatcherPath));
 	private static final String DOWNLOAD_URL_PROPERTY = "modpatcher.downloadUrl";
 	private static final String REQUIRED_VERSION_PROPERTY = "modpatcher.requiredVersion";
@@ -148,10 +148,11 @@ public class ModPatcher {
 	}
 
 	private static Path realPath(String s) {
+		Path absolute = Paths.get(s).toAbsolutePath();
 		try {
-			return Paths.get(s).toAbsolutePath().toRealPath();
+			return absolute.toRealPath();
 		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+			return absolute;
 		}
 	}
 
