@@ -30,8 +30,8 @@ public class ModPatcher {
 	private static final int API_VERSION = 0;
 	private static final Logger log = LogManager.getLogger("ModPatcher");
 	private static final String mcVersion = "@MC_VERSION@";
-	private static final Path neverUpdatePath = realPath("./mods/ModPatcher/NEVER_UPDATE.txt");
-	private static final Path modPatcherPath = realPath("./mods/ModPatcher/ModPatcher.lib");
+	private static final Path neverUpdatePath = realPath("./ModPatcher/NEVER_UPDATE.txt");
+	private static final Path modPatcherPath = realPath("./ModPatcher/ModPatcher.jar");
 	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!Files.exists(modPatcherPath));
 	private static final String DOWNLOAD_URL_PROPERTY = "modpatcher.downloadUrl";
 	private static final String REQUIRED_VERSION_PROPERTY = "modpatcher.requiredVersion";
@@ -207,22 +207,22 @@ public class ModPatcher {
 		ClassLoader cl = ModPatcher.class.getClassLoader();
 
 		try {
-			Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-
+			final URL url = modPatcherPath.toUri().toURL();
+			log.info("Adding " + url + " to LCL");
 			if (cl instanceof LaunchClassLoader) {
 				LaunchClassLoader lcl = (LaunchClassLoader) cl;
 				final String package_ = "me.nallar.modpatcher";
 				lcl.addTransformerExclusion(package_);
-				method = LaunchClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				Set<String> invalidClasses = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
 				Set<String> negativeResources = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
 				invalidClasses.removeIf(it -> it.startsWith(package_));
 				negativeResources.removeIf(it -> it.startsWith(package_));
+				lcl.addURL(url);
+			} else {
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+				method.setAccessible(true);
+				method.invoke(cl, url);
 			}
-			method.setAccessible(true);
-			final URL url = modPatcherPath.toUri().toURL();
-			log.info("Added " + url + " to LCL");
-			method.invoke(cl, url);
 		} catch (Exception e) {
 			throw new Error(e);
 		}
