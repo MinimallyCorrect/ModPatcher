@@ -27,7 +27,7 @@ import java.util.concurrent.*;
  * This behaviour can be disabled by creating the file "libs/modpatcher/NEVER_UPDATE.txt"
  */
 public class ModPatcher {
-	private static final int API_VERSION = 0;
+	private static final int API_VERSION = 1;
 	private static final Logger log = LogManager.getLogger("ModPatcher");
 	private static final String mcVersion = "@MC_VERSION@";
 	private static final Path neverUpdatePath = realPath("mods/ModPatcher_NEVER_UPDATE.txt");
@@ -45,36 +45,36 @@ public class ModPatcher {
 	private static Version requiredVersion;
 	private static Version lastVersion;
 
+	static {
+		requireVersionInternal(null, null);
+	}
+
 	/**
 	 * Gets the name of the setup class to use in your IFMLLoadingPlugin
 	 *
 	 * @return Name of the ModPatcher setup class
 	 */
 	public static String getSetupClass() {
-		return getSetupClass(null);
-	}
-
-	/**
-	 * Gets the name of the setup class to use in your IFMLLoadingPlugin
-	 *
-	 * @param versionString Minimum version of ModPatcher required. Special value "latest" always uses latest version
-	 * @return Name of the ModPatcher setup class
-	 */
-	public static String getSetupClass(String versionString) {
-		return getSetupClass(versionString, null);
-	}
-
-	/**
-	 * Gets the name of the setup class to use in your IFMLLoadingPlugin
-	 *
-	 * @param versionString Minimum version of ModPatcher required. Special value "latest" always uses latest version
-	 * @param release       Release stream to use
-	 * @return Name of the ModPatcher setup class
-	 */
-	public static String getSetupClass(String versionString, String release) {
-		requireVersion(versionString, release);
-
 		return "me.nallar.modpatcher.ModPatcherSetup";
+	}
+
+	/**
+	 * Requests the given ModPatcher version
+	 *
+	 * @param versionString Minimum version of ModPatcher required. Special value "latest" always uses latest version
+	 */
+	public static void requireVersion(String versionString) {
+		requireVersion(versionString, null);
+	}
+
+	/**
+	 * Requests the given ModPatcher version
+	 *
+	 * @param versionString Minimum version of ModPatcher required. Special value "latest" always uses latest version
+	 * @param release       Release stream to use. null by default
+	 */
+	public static void requireVersion(String versionString, String release) {
+		requireVersionInternal(versionString, release);
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class ModPatcher {
 		}
 	}
 
-	private static void requireVersion(String versionString, String release) {
+	private static void requireVersionInternal(String versionString, String release) {
 		if (updateRequired == null)
 			throw new Error("Modpatcher has already been loaded, it is too late to call getSetupClass");
 

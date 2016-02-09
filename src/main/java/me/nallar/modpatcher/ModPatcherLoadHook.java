@@ -3,7 +3,7 @@ package me.nallar.modpatcher;
 import me.nallar.javatransformer.api.JavaTransformer;
 
 class ModPatcherLoadHook {
-	private static final int API_VERSION = 0; //Keep in sync with version in ModPatcher.java
+	private static final int API_VERSION = 1; //Keep in sync with version in ModPatcher.java
 	private static final String VERSION = "@VERSION@".replace("-SNAPSHOT", "");
 
 	static void loadHook(ModPatcher.Version requiredVersion, String modPatcherRelease, int apiVersion) {

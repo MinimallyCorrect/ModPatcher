@@ -10,11 +10,18 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
-@IFMLLoadingPlugin.Name("ModPatcher")
-@IFMLLoadingPlugin.SortingIndex(1001) // Magic value, after deobf transformer.
+@IFMLLoadingPlugin.Name("@MOD_NAME@Core")
+@IFMLLoadingPlugin.MCVersion("@MC_VERSION@")
+@IFMLLoadingPlugin.SortingIndex(1001)
 public class CoreMod implements IFMLLoadingPlugin {
 	static {
-		logToFile();
+		ModPatcher.requireVersion("latest", "beta");
+		try {
+			logToFile();
+		} catch (Exception e) {
+			// If we can't set up logging properly at this point, don't crash hard
+			e.printStackTrace();
+		}
 	}
 
 	private static void logToFile() {
@@ -40,7 +47,7 @@ public class CoreMod implements IFMLLoadingPlugin {
 
 	@Override
 	public String getSetupClass() {
-		return ModPatcher.getSetupClass("latest", "beta");
+		return ModPatcher.getSetupClass();
 	}
 
 	@Override

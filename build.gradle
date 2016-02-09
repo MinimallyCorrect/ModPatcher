@@ -51,7 +51,8 @@ minecraft {
 	version = fullForgeVersion
 	mappings = "stable_20"
 
-	replace "@VERSION@", project.versionWithBuildNumber
+	replace "@MOD_NAME@", project.name
+	replace "@MOD_VERSION@", project.versionWithBuildNumber
 	replace "@MC_VERSION@", version
 }
 
