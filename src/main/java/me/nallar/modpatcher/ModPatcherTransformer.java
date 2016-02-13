@@ -120,8 +120,13 @@ class ModPatcherTransformer {
 	}
 
 	static MixinApplicator getMixinApplicator() {
-		if (mixinApplicator == null)
-			mixinApplicator = new MixinApplicator();
+		MixinApplicator mixinApplicator = ModPatcherTransformer.mixinApplicator;
+
+		if (mixinApplicator == null) {
+			ModPatcherTransformer.mixinApplicator = mixinApplicator = new MixinApplicator();
+			mixinApplicator.setMakeAccessible(false);
+			mixinApplicator.setNoMixinIsError(true);
+		}
 
 		return mixinApplicator;
 	}
