@@ -10,6 +10,7 @@ import java.io.*;
 import java.nio.file.*;
 
 public class ModPatcher implements IClassTransformer {
+	public static final ClassLoaderPool pool;
 	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
 	private static final Patcher patcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
@@ -26,7 +27,7 @@ public class ModPatcher implements IClassTransformer {
 		}
 		Patcher postSrgPatcher_;
 		try {
-			postSrgPatcher_ = new Patcher(new ClassLoaderPool(), Patches.class, new MCPMappings());
+			postSrgPatcher_ = new Patcher(pool = new ClassLoaderPool(), Patches.class, new MCPMappings());
 		} catch (Exception t) {
 			PatcherLog.error("Failed to create Patcher", t);
 			throw new RuntimeException(t);

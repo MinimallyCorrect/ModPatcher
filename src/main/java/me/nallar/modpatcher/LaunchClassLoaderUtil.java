@@ -153,8 +153,10 @@ public enum LaunchClassLoaderUtil {
 
 	public static void cacheSrgBytes(String transformedName, byte[] bytes) {
 		byte[] old = cachedSrgClasses.put(transformedName, bytes);
-		if (old != null && !Arrays.equals(bytes, old))
-			throw new Error("Inconsistent transformation results. Tried to cache different bytes for class " + transformedName + " to previous result after transformation.");
+		if (old != null && !Arrays.equals(bytes, old)) {
+			ModPatcher.pool.dropCache(transformedName);
+			PatcherLog.error(null, new Error("Inconsistent transformation results. Tried to cache different bytes for class " + transformedName + " to previous result after transformation."));
+		}
 	}
 
 	public static byte[] getClassBytes(String name) {
