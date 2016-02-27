@@ -75,6 +75,10 @@ public class ClassLoaderPool extends ClassPool {
 		}
 	}
 
+	public void dropCache(String name) {
+		classes.remove(name);
+	}
+
 	public static class Handler extends URLStreamHandler {
 		final byte[] data;
 
