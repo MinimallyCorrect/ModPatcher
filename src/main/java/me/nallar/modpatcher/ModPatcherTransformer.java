@@ -11,6 +11,7 @@ import java.io.*;
 import java.nio.file.*;
 
 class ModPatcherTransformer {
+	public static final ClassLoaderPool pool;
 	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
 	private static final Patcher patcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
@@ -24,17 +25,11 @@ class ModPatcherTransformer {
 
 		checkForMultipleClassLoads();
 
-		patcher = createPatcher();
-	}
-
-	private static Patcher createPatcher() {
 		try {
-			Patcher patcher = new Patcher(new ClassLoaderPool(), Patches.class, new MCPMappings());
+			patcher = new Patcher(pool = new ClassLoaderPool(), Patches.class, new MCPMappings());
 
 			// TODO - issue #2. Determine layout/config file structure
 			recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY), patcher);
-
-			return patcher;
 		} catch (Throwable t) {
 			throw logError("Failed to create Patcher", t);
 		}
