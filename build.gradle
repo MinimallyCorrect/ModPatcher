@@ -137,6 +137,7 @@ def apiJarConfig = {
 		sourceSets.main.output
 	}
 	include 'me/nallar/modpatcher/ModPatcher.*'
+	include 'me/nallar/modpatcher/ModPatcher$Version.*'
 	include 'me/nallar/modpatcher/ModPatcherSetup.*'
 }
 
