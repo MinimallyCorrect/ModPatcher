@@ -148,6 +148,11 @@ public class ModPatcher {
 		return ModPatcherTransformer.getDefaultPatchesDirectory();
 	}
 
+	static void initialiseClassLoader(LaunchClassLoader classLoader) {
+		checkClassLoading();
+		ModPatcherTransformer.initialiseClassLoader(classLoader);
+	}
+
 	private static Path realPath(String s) {
 		Path absolute = Paths.get(s).toAbsolutePath();
 		try {

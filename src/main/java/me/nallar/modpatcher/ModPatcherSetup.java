@@ -13,7 +13,7 @@ import java.util.*;
 public class ModPatcherSetup implements IFMLCallHook {
 	@Override
 	public void injectData(Map<String, Object> data) {
-		ModPatcherTransformer.initialiseClassLoader((LaunchClassLoader) data.get("classLoader"));
+		ModPatcher.initialiseClassLoader((LaunchClassLoader) data.get("classLoader"));
 	}
 
 	@Override
