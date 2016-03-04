@@ -335,8 +335,9 @@ public class ModPatcher {
 		private Version(String version) {
 			if (version == null)
 				throw new IllegalArgumentException("Version can not be null");
+			version = version.trim();
 			if (!version.matches("[0-9]+(\\.[0-9]+)*"))
-				throw new IllegalArgumentException("Invalid version format");
+				throw new IllegalArgumentException("Invalid version format. Should consist entirely of digits and dots. Got '" + version + "'");
 			this.version = version;
 		}
 
