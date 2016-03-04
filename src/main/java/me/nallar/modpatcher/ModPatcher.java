@@ -391,6 +391,11 @@ public class ModPatcher {
 		}
 
 		@Override
+		public String toString() {
+			return version;
+		}
+
+		@Override
 		public int hashCode() {
 			return version.hashCode();
 		}
