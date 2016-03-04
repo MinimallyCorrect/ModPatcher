@@ -31,7 +31,7 @@ class MCPMappings extends Mappings {
 		try {
 			loadCsv(Mappings.class.getResourceAsStream("/methods.csv"), methodSeargeMappings);
 			loadCsv(Mappings.class.getResourceAsStream("/fields.csv"), fieldSeargeMappings);
-			loadSrg(Mappings.class.getResourceAsStream("/srg-mcp.srg"));
+			loadSrg(Mappings.class.getResourceAsStream("/notch-srg.srg"));
 		} catch (Exception e) {
 			PatcherLog.error("Failed to load MCP mappings", e);
 		}

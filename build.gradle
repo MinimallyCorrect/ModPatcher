@@ -91,7 +91,7 @@ if (System.env.GRADLE_USER_HOME) {
 	ext.homeDir = System.properties['user.home'] + '/.gradle/'
 }
 ext.mappingsPath = homeDir + 'caches/minecraft/de/oceanlabs/mcp/mcp_' + mappings_channel + '/' + mappings_version + '/'
-ext.srgPath = mappingsPath + 'srgs/srg-mcp.srg'
+ext.srgPath = mappingsPath + 'srgs/notch-srg.srg'
 
 jar.doFirst {
 	if (!file(mappingsPath + 'fields.csv').exists() || !file(srgPath))
