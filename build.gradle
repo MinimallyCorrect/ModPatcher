@@ -114,14 +114,14 @@ processResources {
 	// this will ensure that this task is redone when the versions change.
 	inputs.property "version", project.version
 	inputs.property "mcversion", project.minecraft.version
-	println(project.versionWithBuildNumber)
+	println("Determined ModPatcher version: " + project.versionWithBuildNumber)
 	versionFile.text = project.versionWithBuildNumber
 
 	filesMatching("mcmod.info") {
-		expand 'version': project.version, 'mcversion': project.minecraft.version, 'name': project.projectName
+		expand 'version': project.versionWithBuildNumber, 'mcversion': project.minecraft.version, 'name': project.projectName
 	}
 	filesMatching("modpatcher.version") {
-		expand 'version': project.version
+		expand 'version': project.versionWithBuildNumber
 	}
 }
 
