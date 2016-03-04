@@ -205,7 +205,7 @@ public enum LaunchClassLoaderUtil {
 		while (parts.hasNext()) {
 			String part = parts.next();
 
-			for (String part2 : transformerExceptions) {
+			for (String part2 : new HashSet<>(transformerExceptions)) {
 				if (!part.equals(part2) && part.startsWith(part2)) {
 					parts.remove();
 				}
