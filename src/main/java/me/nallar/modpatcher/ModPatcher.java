@@ -294,7 +294,8 @@ public class ModPatcher {
 
 		try {
 			if (!updateRequired.isDone() || updateRequired.isCancelled() || !updateRequired.get()) {
-				updateRequired = new FutureTask<>(() -> {
+				FutureTask<Boolean> task;
+				updateRequired = task = new FutureTask<>(() -> {
 					Version current = getLastVersion();
 					if (requiredVersion.newerThan(current)) {
 						try {
@@ -307,6 +308,7 @@ public class ModPatcher {
 					}
 					return false;
 				});
+				task.run();
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			log.warn("Interrupted when checking done/not cancelled future", e);
