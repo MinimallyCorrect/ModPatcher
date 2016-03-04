@@ -296,7 +296,13 @@ public class ModPatcher {
 			if (!updateRequired.isDone() || updateRequired.isCancelled() || !updateRequired.get()) {
 				FutureTask<Boolean> task;
 				updateRequired = task = new FutureTask<>(() -> {
-					Version current = getLastVersion();
+					Version current;
+					try {
+						current = getLastVersion();
+					} catch (Exception e) {
+						current = Version.NONE;
+						log.warn("Failed to determine current ModPatcher version, assuming it is outdated", e);
+					}
 					if (requiredVersion.newerThan(current)) {
 						try {
 							Version online = new Version(Resources.toString(new URL(System.getProperty(VERSION_URL_PROPERTY, "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/version.txt")), Charsets.UTF_8).trim());
