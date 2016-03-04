@@ -31,6 +31,9 @@ ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
 ext.mcVersion = '1.8.9'
 ext.forgeVersion = "11.15.1.1734"
+ext.mappings_channel = "stable"
+ext.mappings_version = "20"
+ext.mappings = mappings_channel + '_' + mappings_version
 ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 
 // ci information
@@ -49,7 +52,7 @@ versionFile.getParentFile().mkdir()
 
 minecraft {
 	version = fullForgeVersion
-	mappings = "stable_20"
+	mappings = project.mappings
 
 	replace "@MOD_NAME@", project.name
 	replace "@MOD_VERSION@", project.versionWithBuildNumber
@@ -87,7 +90,12 @@ if (System.env.GRADLE_USER_HOME) {
 } else {
 	ext.homeDir = System.properties['user.home'] + '/.gradle/'
 }
-ext.mappingsPath = homeDir + 'caches/minecraft/net/minecraftforge/forge/' + fullForgeVersion + '/unpacked/conf/'
+ext.mappingsPath = homeDir + 'caches/minecraft/de/oceanlabs/mcp/mcp_' + mappings_channel + '/' + mappings_version + '/'
+
+jar.doFirst {
+	if (!file(mappingsPath + 'fields.csv').exists())
+		throw new Error("Can't find mappings at " + mappingsPath)
+}
 
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -96,7 +104,7 @@ jar {
 	}) {
 		exclude "META-INF/**"
 	}
-	from mappingsPath + 'packaged.srg'
+	from mappingsPath + '/srg/srg-mcp.srg'
 	from mappingsPath + 'methods.csv'
 	from mappingsPath + 'fields.csv'
 	from './generated/extendsMap.obj'
