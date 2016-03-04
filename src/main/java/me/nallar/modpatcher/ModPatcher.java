@@ -44,6 +44,7 @@ public class ModPatcher {
 	private static Future<Boolean> updateRequired = defaultUpdateRequired;
 	private static Version requiredVersion;
 	private static Version lastVersion;
+	private static boolean checked = false;
 
 	static {
 		requireVersionInternal(null, null);
@@ -275,9 +276,13 @@ public class ModPatcher {
 	}
 
 	private static void checkClassLoading(boolean load) {
+		if (checked)
+			return;
+
 		try {
 			Class.forName(MODPATCHER_PACKAGE + ".ModPatcherLoadHook");
 			ModPatcherLoadHook.loadHook(requiredVersion, getModPatcherRelease(), API_VERSION);
+			checked = true;
 		} catch (ClassNotFoundException | NoClassDefFoundError e) {
 			if (!load)
 				throw new Error(e);
