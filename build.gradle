@@ -113,7 +113,7 @@ jar {
 
 processResources {
 	// this will ensure that this task is redone when the versions change.
-	inputs.property "version", project.version
+	inputs.property "version", project.versionWithBuildNumber
 	inputs.property "mcversion", project.minecraft.version
 	println("Determined ModPatcher version: " + project.versionWithBuildNumber)
 	versionFile.text = project.versionWithBuildNumber
