@@ -16,7 +16,7 @@ class ModPatcherLoadHook {
 
 		ModPatcher.Version current = ModPatcher.Version.of(VERSION);
 
-		if (current.compareTo(requiredVersion) < 0) {
+		if (requiredVersion != ModPatcher.Version.LATEST && current.compareTo(requiredVersion) < 0) {
 			String autoUpdate = "\nWill auto-update on next start.";
 
 			if (ModPatcher.neverUpdate())
