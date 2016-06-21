@@ -130,22 +130,33 @@ class ModPatcherTransformer {
 		static IClassTransformer INSTANCE = new ClassTransformer();
 		private boolean init;
 
+		private static void dumpIfEnabled(String name, byte[] data) {
+			if (!DUMP)
+				return;
+
+			Path path = Paths.get("./DUMP/" + name + ".class");
+			try {
+				Files.createDirectories(path.getParent());
+				Files.write(path, data);
+			} catch (IOException e) {
+				PatcherLog.error("Failed to dump class " + name, e);
+			}
+		}
+
 		@Override
 		public byte[] transform(String name, String transformedName, byte[] bytes) {
 			if (!init) {
 				init = true;
 				patcher.logDebugInfo();
 			}
-			if (DUMP) {
-				Path path = Paths.get("./DUMP/" + name);
-				try {
-					Files.createDirectories(path.getParent());
-					Files.write(path, bytes);
-				} catch (IOException e) {
-					PatcherLog.error("Failed to dump class " + name, e);
-				}
-			}
-			return transformationHook(transformedName, bytes);
+
+			dumpIfEnabled(name + "_unpatched", bytes);
+
+			byte[] transformed = transformationHook(transformedName, bytes);
+
+			dumpIfEnabled(name, transformed);
+
+			return transformed;
 		}
 	}
 }
