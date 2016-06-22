@@ -366,10 +366,6 @@ public class ModPatcher {
 			return new Version(s);
 		}
 
-		public final String get() {
-			return this.version;
-		}
-
 		@Override
 		public int compareTo(Version that) {
 			if (that == null)
@@ -378,8 +374,8 @@ public class ModPatcher {
 			if (this == that || version.equals(that.version))
 				return 0;
 
-			String[] thisParts = this.get().split("\\.");
-			String[] thatParts = that.get().split("\\.");
+			String[] thisParts = version.split("\\.");
+			String[] thatParts = that.version.split("\\.");
 			int length = Math.max(thisParts.length, thatParts.length);
 			for (int i = 0; i < length; i++) {
 				int thisPart = i < thisParts.length ?

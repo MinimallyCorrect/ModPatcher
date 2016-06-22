@@ -16,7 +16,7 @@ class ModPatcherLoadHook {
 
 		ModPatcher.Version current = ModPatcher.Version.of(VERSION);
 
-		if (requiredVersion != ModPatcher.Version.LATEST && current.compareTo(requiredVersion) < 0) {
+		if (isOutdated(current, requiredVersion)) {
 			String autoUpdate = "\nWill auto-update on next start.";
 
 			if (ModPatcher.neverUpdate())
@@ -26,5 +26,9 @@ class ModPatcherLoadHook {
 
 			throw new RuntimeException("ModPatcher outdated. Have version: " + VERSION + ", requested version: " + requiredVersion + autoUpdate);
 		}
+	}
+
+	static boolean isOutdated(ModPatcher.Version current, ModPatcher.Version required) {
+		return required != ModPatcher.Version.LATEST && current.compareTo(required) < 0;
 	}
 }
