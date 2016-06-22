@@ -76,7 +76,10 @@ public class ClassLoaderPool extends ClassPool {
 	}
 
 	public void dropCache(String name) {
-		classes.remove(name);
+		if (classes.remove(name) == null) {
+			// TODO: Should be behind a system property? Could be very spammy
+			PatcherLog.warn("Failed to drop " + name + " from cache. Currently cached: " + classes.keySet().toString());
+		}
 	}
 
 	public static class Handler extends URLStreamHandler {
