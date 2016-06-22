@@ -19,9 +19,9 @@ public enum LaunchClassLoaderUtil {
 		DEOBF_TRANSFORMER_NAME,
 		SPONGEPOWERED_MIXIN_TRANSFORMER_NAME
 	);
-	// Automatically includes TransformerWrapper wrapped versions as allowed
-	private static final List<String> WHITELISTED_TRANSFORMERS = Collections.singletonList(
-		"net.minecraftforge.fml.common.asm.transformers"
+	private static final List<String> WHITELISTED_TRANSFORMERS = Arrays.asList(
+		"net.minecraftforge.fml.common.asm.transformers.PatchingTransformer",
+		"net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer"
 	);
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
