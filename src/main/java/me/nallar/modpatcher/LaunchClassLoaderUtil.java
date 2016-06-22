@@ -13,9 +13,10 @@ import java.util.*;
 
 public enum LaunchClassLoaderUtil {
 	;
+	private static final String SPONGEPOWERED_MIXIN_TRANSFORMER_NAME = "org.spongepowered.asm.mixin.transformer.MixinTransformer$Proxy";
 	private static final List<String> DEOBF_TRANSFORMER_NAMES = Arrays.asList(
 		"net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer",
-		"org.spongepowered.asm.mixin.transformer.MixinTransformer$Proxy"
+		SPONGEPOWERED_MIXIN_TRANSFORMER_NAME
 	);
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
@@ -164,7 +165,7 @@ public enum LaunchClassLoaderUtil {
 	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
 		Iterable<IClassTransformer> transformers = getTransformers();
 		for (final IClassTransformer transformer : transformers) {
-			if (transformer == ModPatcherTransformer.getInstance()) {
+			if (transformer == ModPatcherTransformer.getInstance() || Objects.equals(transformer.getClass().getName(), SPONGEPOWERED_MIXIN_TRANSFORMER_NAME)) {
 				cacheSrgBytes(transformedName, basicClass);
 				return basicClass;
 			}

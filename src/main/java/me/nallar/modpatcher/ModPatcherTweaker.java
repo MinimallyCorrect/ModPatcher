@@ -5,6 +5,7 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 
 import java.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -19,6 +20,16 @@ public class ModPatcherTweaker implements ITweaker {
 
 	private static void inject() {
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());
+		try {
+			Class<?> mixinEnvironmentClass = Class.forName("org.spongepowered.asm.mixin.MixinEnvironment", false, ModPatcherTweaker.class.getClassLoader());
+			Method m = mixinEnvironmentClass.getMethod("addTransformerExclusion");
+			m.invoke(ModPatcherTransformer.class.getName());
+		} catch (ClassNotFoundException ignored) {
+			// TODO Silence this once confirmed working?
+			PatcherLog.trace("Failed to find mixin environment, normal for non-spongepowered", ignored);
+		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+			PatcherLog.warn("Failed to add mixin transformer exclusion for our transformer", e);
+		}
 	}
 
 	@Override
@@ -34,6 +45,7 @@ public class ModPatcherTweaker implements ITweaker {
 	@Override
 	public String getLaunchTarget() {
 		inject();
+		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
 		return null;
 	}
 
