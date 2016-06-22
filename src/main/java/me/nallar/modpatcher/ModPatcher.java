@@ -386,6 +386,13 @@ public class ModPatcher {
 					Integer.parseInt(thisParts[i]) : 0;
 				int thatPart = i < thatParts.length ?
 					Integer.parseInt(thatParts[i]) : 0;
+
+				if (this.snapshot && i > thisParts.length)
+					thisPart = Integer.MAX_VALUE;
+
+				if (that.snapshot && i > thatParts.length)
+					thatPart = Integer.MAX_VALUE;
+
 				if (thisPart < thatPart)
 					return -1;
 				if (thisPart > thatPart)
@@ -397,12 +404,12 @@ public class ModPatcher {
 
 		@Override
 		public String toString() {
-			return version;
+			return version + (snapshot ? "-SNAPSHOT" : "");
 		}
 
 		@Override
 		public int hashCode() {
-			return version.hashCode();
+			return toString().hashCode();
 		}
 
 		@Override
