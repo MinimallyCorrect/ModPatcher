@@ -19,6 +19,10 @@ public enum LaunchClassLoaderUtil {
 		DEOBF_TRANSFORMER_NAME,
 		SPONGEPOWERED_MIXIN_TRANSFORMER_NAME
 	);
+	// Automatically includes TransformerWrapper wrapped versions as allowed
+	private static final List<String> WHITELISTED_TRANSFORMERS = Collections.singletonList(
+		"net.minecraftforge.fml.common.asm.transformers"
+	);
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
@@ -28,6 +32,7 @@ public enum LaunchClassLoaderUtil {
 	static LaunchClassLoader instance;
 
 	private static List<IClassTransformer> transformers;
+	private static IClassTransformer[] srgTransformers;
 	private static IClassNameTransformer renameTransformer;
 	private static Set<String> classLoaderExceptions;
 	private static Set<String> transformerExceptions;
@@ -64,6 +69,8 @@ public enum LaunchClassLoaderUtil {
 		} else {
 			transformers.add(target + 1, transformer);
 		}
+
+		buildSrgTransformList();
 	}
 
 	public static void dumpTransformersIfEnabled() {
@@ -163,20 +170,44 @@ public enum LaunchClassLoaderUtil {
 		}
 	}
 
-	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
+	public static void buildSrgTransformList() {
+		List<IClassTransformer> result = new ArrayList<>();
+
 		Iterable<IClassTransformer> transformers = getTransformers();
 		for (final IClassTransformer transformer : transformers) {
 			if (transformer == ModPatcherTransformer.getInstance()) {
-				cacheSrgBytes(transformedName, basicClass);
-				return basicClass;
+				srgTransformers = result.toArray(new IClassTransformer[0]);
+				return;
 			}
-			basicClass = runTransformer(name, transformedName, basicClass, transformer);
+
+			if (whitelisted(transformer))
+				result.add(transformer);
+
 			if (Objects.equals(transformer.getClass().getName(), DEOBF_TRANSFORMER_NAME)) {
-				cacheSrgBytes(transformedName, basicClass);
-				return basicClass;
+				srgTransformers = result.toArray(new IClassTransformer[0]);
+				return;
 			}
 		}
-		throw new RuntimeException("No SRG transformer!" + Joiner.on(",\n").join(transformers));
+
+		throw new RuntimeException("No SRG or ModPatcher transformer found when building SRG transformer list. " + Joiner.on(",\n").join(transformers));
+	}
+
+	private static boolean whitelisted(IClassTransformer transformer) {
+		for (String whitelistEntry : WHITELISTED_TRANSFORMERS)
+			if (transformer.getClass().getName().startsWith(whitelistEntry))
+				return true;
+
+		return false;
+	}
+
+	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
+		if (srgTransformers == null)
+			throw new RuntimeException("Tried to call transformUpToSrg too early - haven't build SRG transformer list yet");
+
+		for (final IClassTransformer transformer : srgTransformers) {
+			basicClass = runTransformer(name, transformedName, basicClass, transformer);
+		}
+		return basicClass;
 	}
 
 	public static byte[] getSrgBytes(String name) {
