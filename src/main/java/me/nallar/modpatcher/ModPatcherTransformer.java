@@ -107,6 +107,7 @@ class ModPatcherTransformer {
 
 		LaunchClassLoaderUtil.instance = classLoader;
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());
+		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
 		LaunchClassLoaderUtil.removeRedundantExclusions();
 	}
 
@@ -131,7 +132,7 @@ class ModPatcherTransformer {
 		private boolean init;
 
 		private static void dumpIfEnabled(String name, byte[] data) {
-			if (!DUMP)
+			if (!DUMP || !name.contains("net.minecraft"))
 				return;
 
 			Path path = Paths.get("./DUMP/" + name + ".class");
@@ -150,11 +151,12 @@ class ModPatcherTransformer {
 				patcher.logDebugInfo();
 			}
 
-			dumpIfEnabled(name + "_unpatched", bytes);
+			dumpIfEnabled(transformedName + "_unpatched", bytes);
 
 			byte[] transformed = transformationHook(transformedName, bytes);
 
-			dumpIfEnabled(name, transformed);
+			if (bytes != transformed)
+				dumpIfEnabled(transformedName, transformed);
 
 			return transformed;
 		}

@@ -50,7 +50,9 @@ public enum LaunchClassLoaderUtil {
 		PatcherLog.warn("Didn't find deobfuscation transformer " + LaunchClassLoaderUtil.DEOBF_TRANSFORMER_NAME + " in transformers list.\n" +
 			"Did you forget to set the SortingIndex for your coremod >= 1001? This message is expected in a deobf environment.");
 		transformers.add(transformer);
+	}
 
+	public static void dumpTransformersIfEnabled() {
 		if (System.getProperty(DUMP_TRANSFORMERS_PROPERTY_NAME) != null)
 			PatcherLog.info("Transformers: " + transformers.toString(), new Throwable());
 	}
