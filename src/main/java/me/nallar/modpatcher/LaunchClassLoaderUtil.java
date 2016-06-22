@@ -13,7 +13,10 @@ import java.util.*;
 
 public enum LaunchClassLoaderUtil {
 	;
-	private static final String DEOBF_TRANSFORMER_NAME = "net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer";
+	private static final List<String> DEOBF_TRANSFORMER_NAMES = Arrays.asList(
+		"net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer",
+		"org.spongepowered.asm.mixin.transformer.MixinTransformer$Proxy"
+	);
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
@@ -40,16 +43,20 @@ public enum LaunchClassLoaderUtil {
 	public static void addTransformer(IClassTransformer transformer) {
 		List<IClassTransformer> transformers = LaunchClassLoaderUtil.getTransformers();
 
+		int target = -1;
 		for (int i = 0; i < transformers.size(); i++) {
-			if (transformers.get(i).getClass().getName().equals(LaunchClassLoaderUtil.DEOBF_TRANSFORMER_NAME)) {
-				transformers.add(i + 1, transformer);
-				return;
-			}
+			String className = transformers.get(i).getClass().getName();
+			if (DEOBF_TRANSFORMER_NAMES.contains(className))
+				target = i;
 		}
 
-		PatcherLog.warn("Didn't find deobfuscation transformer " + LaunchClassLoaderUtil.DEOBF_TRANSFORMER_NAME + " in transformers list.\n" +
-			"Did you forget to set the SortingIndex for your coremod >= 1001? This message is expected in a deobf environment.");
-		transformers.add(transformer);
+		if (target == -1) {
+			PatcherLog.warn("Didn't find deobfuscation transformers " + DEOBF_TRANSFORMER_NAMES.toString() + " in transformers list.\n" +
+				"Did you forget to set the SortingIndex for your coremod >= 1001? This message is expected in a deobf environment.");
+			transformers.add(transformer);
+		} else {
+			transformers.add(target + 1, transformer);
+		}
 	}
 
 	public static void dumpTransformersIfEnabled() {
