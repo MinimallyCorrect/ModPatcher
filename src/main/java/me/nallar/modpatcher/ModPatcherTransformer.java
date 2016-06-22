@@ -106,6 +106,7 @@ class ModPatcherTransformer {
 		classLoader.addTransformerExclusion("com.github.javaparser.");
 
 		LaunchClassLoaderUtil.instance = classLoader;
+		ModPatcherTweaker.add();
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());
 		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
 		LaunchClassLoaderUtil.removeRedundantExclusions();

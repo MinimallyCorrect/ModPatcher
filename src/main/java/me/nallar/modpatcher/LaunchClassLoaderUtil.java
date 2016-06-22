@@ -45,7 +45,12 @@ public enum LaunchClassLoaderUtil {
 
 		int target = -1;
 		for (int i = 0; i < transformers.size(); i++) {
-			String className = transformers.get(i).getClass().getName();
+			IClassTransformer current = transformers.get(i);
+
+			if (current == transformer)
+				transformers.remove(i--);
+
+			String className = current.getClass().getName();
 			if (DEOBF_TRANSFORMER_NAMES.contains(className))
 				target = i;
 		}
