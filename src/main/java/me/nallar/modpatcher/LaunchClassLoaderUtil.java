@@ -17,6 +17,7 @@ public enum LaunchClassLoaderUtil {
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
+	private static final String DUMP_TRANSFORMERS_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.dumpTransformers";
 	private static final String WARN_INCONSISTENT_TRANSFORMATION_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.warnForInconsistentTransformation";
 	private static final HashMap<String, byte[]> cachedSrgClasses = new HashMap<String, byte[]>();
 	static LaunchClassLoader instance;
@@ -49,6 +50,9 @@ public enum LaunchClassLoaderUtil {
 		PatcherLog.warn("Didn't find deobfuscation transformer " + LaunchClassLoaderUtil.DEOBF_TRANSFORMER_NAME + " in transformers list.\n" +
 			"Did you forget to set the SortingIndex for your coremod >= 1001? This message is expected in a deobf environment.");
 		transformers.add(transformer);
+
+		if (System.getProperty(DUMP_TRANSFORMERS_PROPERTY_NAME) != null)
+			PatcherLog.info("Transformers: " + transformers.toString(), new Throwable());
 	}
 
 	@SuppressWarnings("unchecked")
