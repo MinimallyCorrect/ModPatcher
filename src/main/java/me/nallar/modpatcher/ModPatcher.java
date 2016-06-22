@@ -344,11 +344,16 @@ public class ModPatcher {
 		public static final Version LATEST = new Version(String.valueOf(Integer.MAX_VALUE));
 		public static final Version NONE = new Version("0");
 		private String version;
+		private boolean snapshot;
 
 		private Version(String version) {
 			if (version == null)
 				throw new IllegalArgumentException("Version can not be null");
 			version = version.trim();
+			if (version.endsWith("-SNAPSHOT")) {
+				version = version.replace("-SNAPSHOT", "");
+				snapshot = true;
+			}
 			if (!version.matches("[0-9]+(\\.[0-9]+)*"))
 				throw new IllegalArgumentException("Invalid version format. Should consist entirely of digits and dots. Got '" + version + "'");
 			this.version = version;
@@ -387,7 +392,7 @@ public class ModPatcher {
 					return 1;
 			}
 
-			return 0;
+			return this.snapshot == that.snapshot ? 0 : (this.snapshot ? 1 : -1);
 		}
 
 		@Override
