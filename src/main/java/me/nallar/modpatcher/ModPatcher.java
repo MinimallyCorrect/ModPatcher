@@ -387,10 +387,10 @@ public class ModPatcher {
 				int thatPart = i < thatParts.length ?
 					Integer.parseInt(thatParts[i]) : 0;
 
-				if (this.snapshot && i > thisParts.length)
+				if (this.snapshot && i >= thisParts.length)
 					thisPart = Integer.MAX_VALUE;
 
-				if (that.snapshot && i > thatParts.length)
+				if (that.snapshot && i >= thatParts.length)
 					thatPart = Integer.MAX_VALUE;
 
 				if (thisPart < thatPart)
