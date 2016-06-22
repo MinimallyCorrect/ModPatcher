@@ -4,7 +4,7 @@ import me.nallar.javatransformer.api.JavaTransformer;
 
 class ModPatcherLoadHook {
 	private static final int API_VERSION = 1; //Keep in sync with version in ModPatcher.java
-	private static final String VERSION = "@MOD_VERSION@".replace("-SNAPSHOT", "");
+	private static final String VERSION = "@MOD_VERSION@";
 
 	static void loadHook(ModPatcher.Version requiredVersion, String modPatcherRelease, int apiVersion) {
 		PatcherLog.info("Loaded ModPatcher. Version: @MOD_VERSION@ API version: " + API_VERSION);
