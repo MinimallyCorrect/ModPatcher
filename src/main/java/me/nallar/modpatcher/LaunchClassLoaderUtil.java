@@ -17,6 +17,7 @@ public enum LaunchClassLoaderUtil {
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
+	private static final String WARN_INCONSISTENT_TRANSFORMATION_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.warnForInconsistentTransformation";
 	private static final HashMap<String, byte[]> cachedSrgClasses = new HashMap<String, byte[]>();
 	static LaunchClassLoader instance;
 
@@ -24,6 +25,7 @@ public enum LaunchClassLoaderUtil {
 	private static IClassNameTransformer renameTransformer;
 	private static Set<String> classLoaderExceptions;
 	private static Set<String> transformerExceptions;
+	private static boolean warnedForInconsistentTransformation;
 
 	static {
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
@@ -172,8 +174,24 @@ public enum LaunchClassLoaderUtil {
 		byte[] old = cachedSrgClasses.put(transformedName, bytes);
 		if (old != null && !Arrays.equals(bytes, old)) {
 			ModPatcherTransformer.pool.dropCache(transformedName);
-			PatcherLog.error(null, new Error("Inconsistent transformation results. Tried to cache different bytes for class " + transformedName + " to previous result after transformation."));
+			if (shouldWarnInconsistentTransformation())
+				PatcherLog.warn(null, new Error("Inconsistent transformation results. Tried to cache different bytes for class " + transformedName + " to previous result after transformation."));
 		}
+	}
+
+	private static boolean shouldWarnInconsistentTransformation() {
+		if (System.getProperty(WARN_INCONSISTENT_TRANSFORMATION_PROPERTY_NAME) != null)
+			return true;
+
+		if (!warnedForInconsistentTransformation) {
+			// non-threadsafe but it really doesn't matter if this shows up twice so I don't care
+			warnedForInconsistentTransformation = true;
+
+			PatcherLog.warn("One or more classes have inconsistent transformation results. To enable logging of this," +
+				" add -D" + WARN_INCONSISTENT_TRANSFORMATION_PROPERTY_NAME + "=true to your JVM parameters.");
+		}
+
+		return false;
 	}
 
 	public static byte[] getClassBytes(String name) {
