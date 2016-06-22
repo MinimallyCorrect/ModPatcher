@@ -22,12 +22,14 @@ public class ModPatcherTweaker implements ITweaker {
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());
 		try {
 			Class<?> mixinEnvironmentClass = Class.forName("org.spongepowered.asm.mixin.MixinEnvironment", false, ModPatcherTweaker.class.getClassLoader());
-			Method m = mixinEnvironmentClass.getMethod("addTransformerExclusion");
-			m.invoke(ModPatcherTransformer.class.getName());
+			Field f = mixinEnvironmentClass.getDeclaredField("excludeTransformers");
+			f.setAccessible(true);
+			Set<String> vals = (Set<String>) f.get(null);
+			vals.add(ModPatcherTransformer.class.getName());
 		} catch (ClassNotFoundException ignored) {
 			// TODO Silence this once confirmed working?
 			PatcherLog.trace("Failed to find mixin environment, normal for non-spongepowered", ignored);
-		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+		} catch (NoSuchFieldException | IllegalAccessException e) {
 			PatcherLog.warn("Failed to add mixin transformer exclusion for our transformer", e);
 		}
 	}
