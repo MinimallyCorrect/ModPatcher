@@ -27,9 +27,6 @@ public class ClassLoaderPool extends ClassPool {
 	}
 
 	byte[] getClassBytesRuntime(String className) {
-		if (LaunchClassLoaderUtil.excluded(className.replace('/', '.'))) {
-			return null;
-		}
 		try {
 			return LaunchClassLoaderUtil.getSrgBytes(className);
 		} catch (RuntimeException e) {

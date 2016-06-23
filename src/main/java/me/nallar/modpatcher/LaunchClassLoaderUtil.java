@@ -149,6 +149,15 @@ public enum LaunchClassLoaderUtil {
 		return false;
 	}
 
+	public static boolean allowedForSrg(String name) {
+		if (name.startsWith("net.minecraft") || name.startsWith("nallar.") || name.startsWith("me.nallar."))
+			return true;
+
+		// TODO: Extensibility, need to add to API for patcher use?
+
+		return false;
+	}
+
 	@SuppressWarnings("ConstantConditions")
 	private static byte[] runTransformer(final String name, final String transformedName, byte[] basicClass, final IClassTransformer transformer) {
 		try {
@@ -213,6 +222,12 @@ public enum LaunchClassLoaderUtil {
 	public static byte[] getSrgBytes(String name) {
 		final String transformedName = transformName(name);
 		name = untransformName(name);
+
+		if (!allowedForSrg(transformedName)) {
+			PatcherLog.trace("Tried to get class bytes for not allowed for SRG: " + transformedName);
+			return null;
+		}
+
 		byte[] cached = cachedSrgClasses.get(transformedName);
 		if (cached != null) {
 			return cached;
@@ -226,6 +241,12 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static void cacheSrgBytes(String transformedName, byte[] bytes) {
+		// TODO: Cache for this (and the javassist classpool too?) should be wiped out after worlds load?
+
+		if (!allowedForSrg(transformedName)) {
+			return;
+		}
+
 		byte[] old = cachedSrgClasses.put(transformedName, bytes);
 		if (old != null && !Arrays.equals(bytes, old)) {
 			ModPatcherTransformer.pool.dropCache(transformedName);
