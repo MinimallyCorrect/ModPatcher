@@ -36,7 +36,6 @@ public class ModPatcherTweaker implements ITweaker {
 
 	@Override
 	public void acceptOptions(List<String> list, File file, File file1, String s) {
-		inject();
 	}
 
 	@Override
@@ -46,14 +45,13 @@ public class ModPatcherTweaker implements ITweaker {
 
 	@Override
 	public String getLaunchTarget() {
-		inject();
-		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
-		return null;
+		throw new UnsupportedOperationException("ModPatcherTweaker is not a primary tweaker.");
 	}
 
 	@Override
 	public String[] getLaunchArguments() {
 		inject();
+		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
 		return new String[0];
 	}
 }
