@@ -32,7 +32,8 @@ public class ModPatcher {
 	private static final String mcVersion = "@MC_VERSION@";
 	private static final Path neverUpdatePath = realPath("mods/ModPatcher_NEVER_UPDATE.txt");
 	private static final Path modPatcherPath = realPath("mods/ModPatcher.jlib");
-	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!Files.exists(modPatcherPath));
+	private static final boolean modPatcherPresent = Files.exists(modPatcherPath);
+	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!modPatcherPresent);
 	private static final String DOWNLOAD_URL_PROPERTY = "modpatcher.downloadUrl";
 	private static final String REQUIRED_VERSION_PROPERTY = "modpatcher.requiredVersion";
 	private static final String RELEASE_PROPERTY = "modpatcher.release";
@@ -197,6 +198,12 @@ public class ModPatcher {
 	}
 
 	private static void loadModPatcher() {
+		if (neverUpdate() && !modPatcherPresent)
+			throw new Error(
+				"ModPatcher is set to never update, but the ModPatcher library (ModPatcher.jlib) is not in the mods folder.\n" +
+					"As automatic updating is disabled, we can not retrieve a compatible version of ModPatcher."
+			);
+
 		download();
 
 		updateRequired = null;
