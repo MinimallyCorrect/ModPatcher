@@ -224,7 +224,6 @@ public enum LaunchClassLoaderUtil {
 		name = untransformName(name);
 
 		if (!allowedForSrg(transformedName)) {
-			PatcherLog.trace("Tried to get class bytes for not allowed for SRG: " + transformedName);
 			return null;
 		}
 
