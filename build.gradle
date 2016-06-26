@@ -12,7 +12,7 @@ buildscript {
 	}
 	configurations.all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
 		classpath group: 'me.nallar', name: 'ModPatcherGradle', version: '0.1-SNAPSHOT', changing: true
 	}
 }
@@ -29,10 +29,10 @@ ext.packaging = 'jar'
 ext.url = 'http://nallar.me/minecraft'
 ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
-ext.mcVersion = '1.8.9'
-ext.forgeVersion = "11.15.1.1734"
-ext.mappings_channel = "stable"
-ext.mappings_version = "20"
+ext.mcVersion = '1.10'
+ext.forgeVersion = "12.18.0.1996-1.10.0"
+ext.mappings_channel = "snapshot"
+ext.mappings_version = "20160518"
 ext.mappings = mappings_channel + '_' + mappings_version
 ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 
