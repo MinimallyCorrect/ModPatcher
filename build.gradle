@@ -180,7 +180,6 @@ def installer = install.repositories.mavenInstaller
 		}
 }
 
-
 tasks.withType(Jar) {
 	baseName = project.name
 	manifest.mainAttributes(
@@ -191,4 +190,8 @@ tasks.withType(Jar) {
 		"Implementation-Vendor": url,
 		"FMLCorePlugin": "me.nallar.modpatcher.coremod.CoreMod"
 	)
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '3.0'
 }
