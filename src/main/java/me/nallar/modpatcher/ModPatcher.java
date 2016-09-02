@@ -229,8 +229,8 @@ public class ModPatcher {
 				lcl.addTransformerExclusion(MODPATCHER_PACKAGE);
 				lcl.addURL(url);
 
-				Set<String> invalidClasses = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
-				Set<String> negativeResources = ReflectionHelper.<Set<String>, LaunchClassLoader>getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
+				Set<String> invalidClasses = ReflectionHelper.getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
+				Set<String> negativeResources = ReflectionHelper.getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
 				invalidClasses.removeIf(ModPatcher::removeModPatcherEntries);
 				negativeResources.removeIf(ModPatcher::removeModPatcherEntries);
 
@@ -348,8 +348,8 @@ public class ModPatcher {
 	}
 
 	static class Version implements Comparable<Version> {
-		public static final Version LATEST = new Version(String.valueOf(Integer.MAX_VALUE));
-		public static final Version NONE = new Version("0");
+		static final Version LATEST = new Version(String.valueOf(Integer.MAX_VALUE));
+		static final Version NONE = new Version("0");
 		private String version;
 		private boolean snapshot;
 
@@ -374,7 +374,7 @@ public class ModPatcher {
 		}
 
 		@Override
-		public int compareTo(Version that) {
+		public int compareTo(@SuppressWarnings("NullableProblems") Version that) {
 			if (that == null)
 				return 1;
 
@@ -420,7 +420,7 @@ public class ModPatcher {
 			return this == that || that != null && this.getClass() == that.getClass() && this.compareTo((Version) that) == 0;
 		}
 
-		public boolean newerThan(Version other) {
+		boolean newerThan(Version other) {
 			return compareTo(other) > 0;
 		}
 	}
