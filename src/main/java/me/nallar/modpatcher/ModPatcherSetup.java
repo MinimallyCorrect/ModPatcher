@@ -29,6 +29,8 @@ public class ModPatcherSetup implements IFMLCallHook {
 		classLoader.addTransformerExclusion("org.json");
 		LaunchClassLoaderUtil.instance = classLoader;
 		LaunchClassLoaderUtil.addTransformer(ModPatcher.getInstance());
+		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
+		LaunchClassLoaderUtil.removeRedundantExclusions();
 	}
 
 	@Override
