@@ -293,15 +293,16 @@ public enum LaunchClassLoaderUtil {
 		removeRedundantExclusions(getClassLoaderExceptions());
 	}
 
-	private static void removeRedundantExclusions(Set<String> transformerExceptions) {
-		Iterator<String> parts = transformerExceptions.iterator();
-		while (parts.hasNext()) {
-			String part = parts.next();
+	static void removeRedundantExclusions(Set<String> transformerExceptions) {
+		HashSet<String> old = new HashSet<>(transformerExceptions);
 
-			for (String part2 : new HashSet<>(transformerExceptions)) {
-				if (!part.equals(part2) && part.startsWith(part2)) {
-					parts.remove();
-				}
+		for (String exclusion : old) {
+			for (String exclusion2 : old) {
+				if (exclusion.equals(exclusion2))
+					continue;
+
+				if (exclusion.startsWith(exclusion2))
+					transformerExceptions.remove(exclusion);
 			}
 		}
 	}
