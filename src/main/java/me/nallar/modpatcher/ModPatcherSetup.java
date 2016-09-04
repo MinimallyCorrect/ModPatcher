@@ -30,7 +30,6 @@ public class ModPatcherSetup implements IFMLCallHook {
 		LaunchClassLoaderUtil.instance = classLoader;
 		LaunchClassLoaderUtil.addTransformer(ModPatcher.getInstance());
 		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
-		LaunchClassLoaderUtil.removeRedundantExclusions();
 	}
 
 	@Override

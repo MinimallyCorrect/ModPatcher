@@ -287,22 +287,4 @@ public enum LaunchClassLoaderUtil {
 	public static String untransformName(String name) {
 		return getRenameTransformer().unmapClassName(name);
 	}
-
-	public static void removeRedundantExclusions() {
-		removeRedundantExclusions(getTransformerExceptions());
-		removeRedundantExclusions(getClassLoaderExceptions());
-	}
-
-	private static void removeRedundantExclusions(Set<String> transformerExceptions) {
-		Iterator<String> parts = transformerExceptions.iterator();
-		while (parts.hasNext()) {
-			String part = parts.next();
-
-			for (String part2 : new HashSet<>(transformerExceptions)) {
-				if (!part.equals(part2) && part.startsWith(part2)) {
-					parts.remove();
-				}
-			}
-		}
-	}
 }
