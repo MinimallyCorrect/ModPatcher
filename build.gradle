@@ -29,10 +29,10 @@ ext.packaging = 'jar'
 ext.url = 'http://nallar.me/minecraft'
 ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
-ext.mcVersion = '1.10.2'
-ext.forgeVersion = "12.18.1.2076"
+ext.mcVersion = '1.11'
+ext.forgeVersion = "13.19.1.2189"
 ext.mappings_channel = "snapshot"
-ext.mappings_version = "20160518"
+ext.mappings_version = "20161111"
 ext.mappings = mappings_channel + '_' + mappings_version
 ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 
@@ -200,5 +200,5 @@ tasks.withType(Jar) {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '3.0'
+	gradleVersion = '3.2.1'
 }
