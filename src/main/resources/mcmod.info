@@ -6,7 +6,7 @@
     "description": "Coremod/API for transforming classes using config files.",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "http://nallar.me/minecraft",
+    "url": "https://github.com/nallar/ModPatcher#readme",
     "updateUrl": "",
     "authorList": [ "nallar" ],
     "credits": "Authored by nallar, see github for all contributors.",
