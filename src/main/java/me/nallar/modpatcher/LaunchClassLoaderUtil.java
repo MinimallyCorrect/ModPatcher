@@ -15,6 +15,7 @@ public enum LaunchClassLoaderUtil {
 	;
 	private static final String SPONGEPOWERED_MIXIN_TRANSFORMER_NAME = "org.spongepowered.asm.mixin.transformer.MixinTransformer$Proxy";
 	private static final String DEOBF_TRANSFORMER_NAME = "net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer";
+	private static final boolean TEMPORARY_ALLOW_PATCHING_ALL_CLASSES = Boolean.parseBoolean(System.getProperty("nallar.LaunchClassLoaderUtil.allowPatchingAllClasses", "false"));
 	private static final List<String> DEOBF_TRANSFORMER_NAMES = Arrays.asList(
 		DEOBF_TRANSFORMER_NAME,
 		SPONGEPOWERED_MIXIN_TRANSFORMER_NAME
@@ -150,7 +151,7 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static boolean allowedForSrg(String name) {
-		if (name.startsWith("net.minecraft") || name.startsWith("nallar.") || name.startsWith("me.nallar."))
+		if (TEMPORARY_ALLOW_PATCHING_ALL_CLASSES || name.startsWith("net.minecraft") || name.startsWith("nallar.") || name.startsWith("me.nallar."))
 			return true;
 
 		// TODO: Extensibility, need to add to API for patcher use?
