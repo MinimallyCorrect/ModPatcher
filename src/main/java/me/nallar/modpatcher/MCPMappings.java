@@ -15,14 +15,14 @@ class MCPMappings extends Mappings {
 	private static final Pattern classObfuscatePattern = Pattern.compile("\\^class:([^\\^]+)\\^", Pattern.DOTALL | Pattern.MULTILINE);
 	private static final Pattern methodObfuscatePattern = Pattern.compile("\\^method:([^\\^/]+)/([^\\^/]+)\\^", Pattern.DOTALL | Pattern.MULTILINE);
 	private static final Pattern fieldObfuscatePattern = Pattern.compile("\\^field:([^\\^/]+)/([^\\^/]+)\\^", Pattern.DOTALL | Pattern.MULTILINE);
-	private final Map<String, String> methodSeargeMappings = new HashMap<String, String>();
-	private final Map<String, String> fieldSeargeMappings = new HashMap<String, String>();
+	private final Map<String, String> methodSeargeMappings = new HashMap<>();
+	private final Map<String, String> fieldSeargeMappings = new HashMap<>();
 	private final BiMap<ClassDescription, ClassDescription> classMappings = HashBiMap.create();
 	private final BiMap<MethodDescription, MethodDescription> methodMappings = HashBiMap.create();
 	private final BiMap<MethodDescription, MethodDescription> methodSrgMappings = HashBiMap.create();
-	private final Map<FieldDescription, FieldDescription> fieldSrgMappings = new HashMap<FieldDescription, FieldDescription>();
-	private final Map<String, MethodDescription> parameterlessSrgMethodMappings = new HashMap<String, MethodDescription>();
-	private final Map<String, String> shortClassNameToFullName = new HashMap<String, String>();
+	private final Map<FieldDescription, FieldDescription> fieldSrgMappings = new HashMap<>();
+	private final Map<String, MethodDescription> parameterlessSrgMethodMappings = new HashMap<>();
+	private final Map<String, String> shortClassNameToFullName = new HashMap<>();
 	private final Map<String, List<String>> extendsMap;
 
 	@SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
@@ -40,8 +40,7 @@ class MCPMappings extends Mappings {
 	}
 
 	private static void loadCsv(InputStream mappingsCsv, Map<String, String> seargeMappings) throws IOException {
-		Scanner in = new Scanner(mappingsCsv);
-		try {
+		try (Scanner in = new Scanner(mappingsCsv)) {
 			in.useDelimiter(",");
 			while (in.hasNextLine()) {
 				String seargeName = in.next();
@@ -52,31 +51,22 @@ class MCPMappings extends Mappings {
 					seargeMappings.put(seargeName, name);
 				}
 			}
-		} finally {
-			in.close();
 		}
 		mappingsCsv.close();
 	}
 
 	private Map<String, List<String>> loadExtends(InputStream resourceAsStream) throws IOException {
-		ObjectInputStream objectInputStream = new ObjectInputStream(resourceAsStream);
-		try {
+		try (ObjectInputStream objectInputStream = new ObjectInputStream(resourceAsStream)) {
 			@SuppressWarnings("unchecked")
 			Map<String, String> reversed = (Map<String, String>) objectInputStream.readObject();
-			Map<String, List<String>> extendsMap = new HashMap<String, List<String>>();
+			Map<String, List<String>> extendsMap = new HashMap<>();
 			for (Map.Entry<String, String> e : reversed.entrySet()) {
-				List<String> l = extendsMap.get(e.getValue());
-				if (l == null) {
-					l = new ArrayList<String>();
-					extendsMap.put(e.getValue(), l);
-				}
+				List<String> l = extendsMap.computeIfAbsent(e.getValue(), k -> new ArrayList<>());
 				l.add(e.getKey());
 			}
 			return extendsMap;
 		} catch (ClassNotFoundException e) {
 			PatcherLog.error("Failed to read extends mapping", e);
-		} finally {
-			objectInputStream.close();
 		}
 		return null;
 	}

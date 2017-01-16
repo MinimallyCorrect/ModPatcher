@@ -30,7 +30,7 @@ public enum LaunchClassLoaderUtil {
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
 	private static final String DUMP_TRANSFORMERS_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.dumpTransformers";
 	private static final String WARN_INCONSISTENT_TRANSFORMATION_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.warnForInconsistentTransformation";
-	private static final HashMap<String, byte[]> cachedSrgClasses = new HashMap<String, byte[]>();
+	private static final HashMap<String, byte[]> cachedSrgClasses = new HashMap<>();
 	static LaunchClassLoader instance;
 
 	private static List<IClassTransformer> transformers;
