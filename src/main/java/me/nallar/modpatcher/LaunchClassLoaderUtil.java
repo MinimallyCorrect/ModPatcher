@@ -16,6 +16,7 @@ public enum LaunchClassLoaderUtil {
 	private static final String SPONGEPOWERED_MIXIN_TRANSFORMER_NAME = "org.spongepowered.asm.mixin.transformer.MixinTransformer$Proxy";
 	private static final String DEOBF_TRANSFORMER_NAME = "net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer";
 	private static final boolean TEMPORARY_ALLOW_PATCHING_ALL_CLASSES = Boolean.parseBoolean(System.getProperty("nallar.LaunchClassLoaderUtil.allowPatchingAllClasses", "false"));
+	private static final boolean DUMP_JAVASSIST_LOADED_CLASSES = Boolean.parseBoolean(System.getProperty("nallar.LaunchClassLoaderUtil.dumpJavassistLoadedClasses", "false"));
 	private static final List<String> DEOBF_TRANSFORMER_NAMES = Arrays.asList(
 		DEOBF_TRANSFORMER_NAME,
 		SPONGEPOWERED_MIXIN_TRANSFORMER_NAME
@@ -151,6 +152,9 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static boolean allowedForSrg(String name) {
+		if (name.startsWith("javax.") || name.startsWith("java."))
+			return false;
+
 		if (TEMPORARY_ALLOW_PATCHING_ALL_CLASSES || name.startsWith("net.minecraft") || name.startsWith("nallar.") || name.startsWith("me.nallar."))
 			return true;
 
@@ -228,7 +232,7 @@ public enum LaunchClassLoaderUtil {
 			return null;
 		}
 
-		byte[] cached = cachedSrgClasses.get(transformedName);
+		byte[] cached = cachedSrgClasses.remove(transformedName);
 		if (cached != null) {
 			return cached;
 		}
@@ -245,6 +249,10 @@ public enum LaunchClassLoaderUtil {
 
 		if (!allowedForSrg(transformedName)) {
 			return;
+		}
+
+		if (DUMP_JAVASSIST_LOADED_CLASSES) {
+			PatcherLog.warn("Cached SRG bytes for " + transformedName, new Throwable());
 		}
 
 		byte[] old = cachedSrgClasses.put(transformedName, bytes);
