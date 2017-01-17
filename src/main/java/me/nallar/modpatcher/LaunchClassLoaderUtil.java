@@ -232,6 +232,9 @@ public enum LaunchClassLoaderUtil {
 			return null;
 		}
 
+		if (DUMP_JAVASSIST_LOADED_CLASSES) {
+			PatcherLog.warn("Need to retransform " + transformedName + " to get SRG bytes", new Throwable());
+		}
 		byte[] cached = cachedSrgClasses.remove(transformedName);
 		if (cached != null) {
 			return cached;
@@ -249,10 +252,6 @@ public enum LaunchClassLoaderUtil {
 
 		if (!allowedForSrg(transformedName)) {
 			return;
-		}
-
-		if (DUMP_JAVASSIST_LOADED_CLASSES) {
-			PatcherLog.warn("Cached SRG bytes for " + transformedName, new Throwable());
 		}
 
 		byte[] old = cachedSrgClasses.put(transformedName, bytes);
