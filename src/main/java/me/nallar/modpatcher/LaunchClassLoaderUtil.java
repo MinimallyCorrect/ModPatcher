@@ -224,7 +224,7 @@ public enum LaunchClassLoaderUtil {
 		return basicClass;
 	}
 
-	public static byte[] getSrgBytes(String name) {
+	public static byte[] getSrgBytes(String name, boolean allowRetransform) {
 		final String transformedName = transformName(name);
 		name = untransformName(name);
 
@@ -235,8 +235,8 @@ public enum LaunchClassLoaderUtil {
 		if (DUMP_JAVASSIST_LOADED_CLASSES) {
 			PatcherLog.warn("Need to retransform " + transformedName + " to get SRG bytes", new Throwable());
 		}
-		byte[] cached = cachedSrgClasses.remove(transformedName);
-		if (cached != null) {
+		byte[] cached = cachedSrgClasses.get(transformedName);
+		if (cached != null || !allowRetransform) {
 			return cached;
 		}
 		try {

@@ -26,9 +26,9 @@ public class ClassLoaderPool extends ClassPool {
 		return super.get0(className, true);
 	}
 
-	byte[] getClassBytesRuntime(String className) {
+	private byte[] getClassBytesRuntime(String className, boolean allowReTransform) {
 		try {
-			return LaunchClassLoaderUtil.getSrgBytes(className);
+			return LaunchClassLoaderUtil.getSrgBytes(className, allowReTransform);
 		} catch (RuntimeException e) {
 			if (e.getMessage().contains("No SRG transformer")) {
 				throw new RuntimeException("Classloader used to load LaunchClassLoader: " + LaunchClassLoaderUtil.getInstance().getClass().getClassLoader(), e);
@@ -42,7 +42,7 @@ public class ClassLoaderPool extends ClassPool {
 		if (!className.contains(".")) {
 			return null;
 		}
-		byte[] bytes = getClassBytesRuntime(className);
+		byte[] bytes = getClassBytesRuntime(className, true);
 		if (bytes != null) {
 			try {
 				return new URL(null, "runtimeclass:" + className.replace(".", "/"), new Handler(bytes));
@@ -55,7 +55,7 @@ public class ClassLoaderPool extends ClassPool {
 
 	@Override
 	InputStream openClassfile(String className) throws NotFoundException {
-		byte[] bytes = getClassBytesRuntime(className);
+		byte[] bytes = getClassBytesRuntime(className, true);
 		if (bytes != null) {
 			return new ByteArrayInputStream(bytes);
 		}
@@ -64,7 +64,7 @@ public class ClassLoaderPool extends ClassPool {
 
 	@Override
 	void writeClassfile(String className, OutputStream out) throws NotFoundException, IOException, CannotCompileException {
-		byte[] bytes = getClassBytesRuntime(className);
+		byte[] bytes = getClassBytesRuntime(className, false);
 		if (bytes != null) {
 			out.write(bytes);
 		} else {
@@ -82,7 +82,7 @@ public class ClassLoaderPool extends ClassPool {
 	public static class Handler extends URLStreamHandler {
 		final byte[] data;
 
-		public Handler(byte[] data) {
+		Handler(byte[] data) {
 			this.data = data;
 		}
 
@@ -94,7 +94,7 @@ public class ClassLoaderPool extends ClassPool {
 		public static class MockHttpURLConnection extends HttpURLConnection {
 			private final byte[] data;
 
-			protected MockHttpURLConnection(URL url, byte[] data) {
+			MockHttpURLConnection(URL url, byte[] data) {
 				super(url);
 				this.data = data;
 			}
