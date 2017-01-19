@@ -69,7 +69,7 @@ targetCompatibility = 1.8
 
 repositories {
 	jcenter()
-	maven { url 'http://repo.nallar.me/' }
+	maven { url 'https://repo.nallar.me/' }
 }
 
 configurations {
