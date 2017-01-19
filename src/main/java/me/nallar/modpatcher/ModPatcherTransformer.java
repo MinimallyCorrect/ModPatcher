@@ -94,14 +94,11 @@ class ModPatcherTransformer {
 		return ClassTransformer.INSTANCE;
 	}
 
-	public static void initialiseClassLoader(LaunchClassLoader classLoader) {
+	static void initialiseClassLoader(LaunchClassLoader classLoader) {
 		if (classLoaderInitialised)
 			return;
-
 		classLoaderInitialised = true;
 
-		classLoader.addTransformerExclusion("me.nallar.");
-		classLoader.addTransformerExclusion("nallar.");
 		classLoader.addTransformerExclusion("javassist.");
 		classLoader.addTransformerExclusion("com.github.javaparser.");
 

@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import me.nallar.javapatcher.patcher.Patcher;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraft.launchwrapper.nallar.cachingclassloader.CachingClassLoader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,7 +86,7 @@ public class ModPatcher {
 	 * @param inputStream stream to load patches from
 	 */
 	public static void loadPatches(InputStream inputStream) {
-		getPatcher().loadPatches(inputStream);
+		ModPatcherTransformer.getPatcher().loadPatches(inputStream);
 	}
 
 	/**
@@ -94,7 +95,7 @@ public class ModPatcher {
 	 * @param patches String to load patches from
 	 */
 	public static void loadPatches(String patches) {
-		getPatcher().loadPatches(patches);
+		ModPatcherTransformer.getPatcher().loadPatches(patches);
 	}
 
 	/**
@@ -229,10 +230,26 @@ public class ModPatcher {
 				lcl.addTransformerExclusion(MODPATCHER_PACKAGE);
 				lcl.addURL(url);
 
-				Set<String> invalidClasses = ReflectionHelper.getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
-				Set<String> negativeResources = ReflectionHelper.getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
-				invalidClasses.removeIf(ModPatcher::removeModPatcherEntries);
-				negativeResources.removeIf(ModPatcher::removeModPatcherEntries);
+				boolean cclInvalidNegativeCleared = false;
+				try {
+					// No, IDEA, it's not always true
+					//noinspection ConstantConditions
+					if (lcl instanceof CachingClassLoader) {
+						CachingClassLoader ccl = (CachingClassLoader) lcl;
+						ccl.clearFailures(ModPatcher::removeModPatcherEntries);
+					}
+					cclInvalidNegativeCleared = true;
+				} catch (NoClassDefFoundError ignored) {
+				}
+
+				//and that's not always true either
+				//noinspection ConstantConditions
+				if (!cclInvalidNegativeCleared) {
+					Set<String> invalidClasses = ReflectionHelper.getPrivateValue(LaunchClassLoader.class, lcl, "invalidClasses");
+					Set<String> negativeResources = ReflectionHelper.getPrivateValue(LaunchClassLoader.class, lcl, "negativeResourceCache");
+					invalidClasses.removeIf(ModPatcher::removeModPatcherEntries);
+					negativeResources.removeIf(ModPatcher::removeModPatcherEntries);
+				}
 
 				log.trace("Loaded class: " + Class.forName(MODPATCHER_PACKAGE + ".ModPatcherLoadHook"));
 			} else {

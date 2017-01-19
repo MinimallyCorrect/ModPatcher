@@ -82,6 +82,7 @@ dependencies {
 	testCompile 'junit:junit:4.12'
 	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
 	compile group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
+	provided group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
 	compile 'org.javassist:javassist:3.20.0-GA'
 }
 
