@@ -48,7 +48,7 @@ ext.commit = System.getenv("GIT_COMMIT") ?: 'unknown'
 
 repositories {
 	mavenCentral()
-	maven { url 'http://repo.nallar.me/' }
+	maven { url 'https://repo.nallar.me/' }
 }
 
 configurations {
