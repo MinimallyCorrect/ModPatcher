@@ -14,8 +14,7 @@ import java.util.*;
 public class ModPatcherTweaker implements ITweaker {
 	@SuppressWarnings("unchecked")
 	public static void add() {
-		List<String> newTweaks = (List<String>) Launch.blackboard.get("TweakClasses");
-		newTweaks.add(ModPatcherTweaker.class.getName());
+		((List<String>) Launch.blackboard.get("TweakClasses")).add(ModPatcherTweaker.class.getName());
 	}
 
 	private static void inject() {
