@@ -4,7 +4,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import me.nallar.javapatcher.patcher.Patcher;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraft.launchwrapper.nallar.cachingclassloader.CachingClassLoader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -234,10 +233,7 @@ public class ModPatcher {
 				try {
 					// No, IDEA, it's not always true
 					//noinspection ConstantConditions
-					if (lcl instanceof CachingClassLoader) {
-						CachingClassLoader ccl = (CachingClassLoader) lcl;
-						ccl.clearFailures(ModPatcher::removeModPatcherEntries);
-					}
+					lcl.clearFailures(ModPatcher::removeModPatcherEntries);
 					cclInvalidNegativeCleared = true;
 				} catch (NoClassDefFoundError ignored) {
 				}
