@@ -85,6 +85,7 @@ public class ModPatcher {
 	 * @param inputStream stream to load patches from
 	 */
 	public static void loadPatches(InputStream inputStream) {
+		checkClassLoading();
 		ModPatcherTransformer.getPatcher().loadPatches(inputStream);
 	}
 
@@ -94,6 +95,7 @@ public class ModPatcher {
 	 * @param patches String to load patches from
 	 */
 	public static void loadPatches(String patches) {
+		checkClassLoading();
 		ModPatcherTransformer.getPatcher().loadPatches(patches);
 	}
 
