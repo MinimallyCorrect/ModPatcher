@@ -157,11 +157,6 @@ def apiJarConfig = {
 		include 'me/nallar/modpatcher/ModPatcher$Version.*'
 		include 'me/nallar/modpatcher/ModPatcherSetup.*'
 	}
-	from((configurations.provided).filter { it.exists() }.collect {
-		it.isDirectory() ? it : zipTree(it)
-	}) {
-		include 'net/minecraft/launchwrapper/nallar/cachingclassloader/CachingClassLoader.*'
-	}
 }
 
 task apiJar(type: Jar, dependsOn: classes)
