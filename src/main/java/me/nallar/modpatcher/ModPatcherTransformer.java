@@ -77,17 +77,21 @@ class ModPatcherTransformer {
 	static byte[] transformationHook(String name, byte[] originalBytes) {
 		LaunchClassLoaderUtil.cacheSrgBytes(name, originalBytes);
 
-		if (mixinApplicator != null) {
-			final byte[] finalOriginalBytes = originalBytes;
-			originalBytes = getMixinApplicator().getMixinTransformer().transformClass(() -> finalOriginalBytes, name).get();
-		}
-
 		try {
-			return patcher.patch(name, originalBytes);
-		} catch (Throwable t) {
-			PatcherLog.error("Failed to patch " + name, t);
+			if (mixinApplicator != null) {
+				final byte[] finalOriginalBytes = originalBytes;
+				originalBytes = getMixinApplicator().getMixinTransformer().transformClass(() -> finalOriginalBytes, name).get();
+			}
+
+			try {
+				return patcher.patch(name, originalBytes);
+			} catch (Throwable t) {
+				PatcherLog.error("Failed to patch " + name, t);
+			}
+			return originalBytes;
+		} finally {
+			LaunchClassLoaderUtil.releaseSrgBytes(name);
 		}
-		return originalBytes;
 	}
 
 	static IClassTransformer getInstance() {
