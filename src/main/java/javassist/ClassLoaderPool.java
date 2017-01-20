@@ -72,8 +72,8 @@ public class ClassLoaderPool extends ClassPool {
 		}
 	}
 
-	public void dropCache(String name) {
-		if (classes.remove(name) == null) {
+	public void dropCache(String name, boolean allowFailure) {
+		if (classes.remove(name) == null && !allowFailure) {
 			// TODO: Should be behind a system property? Could be very spammy
 			PatcherLog.warn("Failed to drop " + name + " from cache. Currently cached: " + classes.keySet().toString());
 		}

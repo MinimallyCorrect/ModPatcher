@@ -256,7 +256,7 @@ public enum LaunchClassLoaderUtil {
 
 		byte[] old = cachedSrgClasses.put(transformedName, bytes);
 		if (old != null && !Arrays.equals(bytes, old)) {
-			ModPatcherTransformer.pool.dropCache(transformedName);
+			ModPatcherTransformer.pool.dropCache(transformedName, false);
 			if (shouldWarnInconsistentTransformation())
 				PatcherLog.warn(null, new Error("Inconsistent transformation results. Tried to cache different bytes for class " + transformedName + " to previous result after transformation."));
 		}
@@ -317,6 +317,6 @@ public enum LaunchClassLoaderUtil {
 
 	public static void releaseSrgBytes(String transformedName) {
 		cachedSrgClasses.remove(transformedName);
-		ModPatcherTransformer.pool.dropCache(transformedName);
+		ModPatcherTransformer.pool.dropCache(transformedName, true);
 	}
 }
