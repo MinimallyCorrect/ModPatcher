@@ -237,7 +237,7 @@ public class ModPatcher {
 					//noinspection ConstantConditions
 					lcl.clearFailures(ModPatcher::removeModPatcherEntries);
 					cclInvalidNegativeCleared = true;
-				} catch (NoClassDefFoundError ignored) {
+				} catch (NoClassDefFoundError | NoSuchMethodError ignored) {
 				}
 
 				//and that's not always true either
