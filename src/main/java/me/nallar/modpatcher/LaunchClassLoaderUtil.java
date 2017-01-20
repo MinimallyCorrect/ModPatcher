@@ -314,4 +314,9 @@ public enum LaunchClassLoaderUtil {
 			}
 		}
 	}
+
+	public static void releaseSrgBytes(String transformedName) {
+		cachedSrgClasses.remove(transformedName);
+		ModPatcherTransformer.pool.dropCache(transformedName);
+	}
 }
