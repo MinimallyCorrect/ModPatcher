@@ -15,7 +15,6 @@ public enum LaunchClassLoaderUtil {
 	;
 	private static final String SPONGEPOWERED_MIXIN_TRANSFORMER_NAME = "org.spongepowered.asm.mixin.transformer.MixinTransformer$Proxy";
 	private static final String DEOBF_TRANSFORMER_NAME = "net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer";
-	private static final boolean TEMPORARY_ALLOW_PATCHING_ALL_CLASSES = Boolean.parseBoolean(System.getProperty("nallar.LaunchClassLoaderUtil.allowPatchingAllClasses", "false"));
 	private static final boolean DUMP_JAVASSIST_LOADED_CLASSES = Boolean.parseBoolean(System.getProperty("nallar.LaunchClassLoaderUtil.dumpJavassistLoadedClasses", "false"));
 	private static final List<String> DEOBF_TRANSFORMER_NAMES = Arrays.asList(
 		DEOBF_TRANSFORMER_NAME,
@@ -143,15 +142,7 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static boolean allowedForSrg(String name) {
-		if (name.startsWith("javax.") || name.startsWith("java."))
-			return false;
-
-		if (TEMPORARY_ALLOW_PATCHING_ALL_CLASSES || name.startsWith("net.minecraft") || name.startsWith("nallar.") || name.startsWith("me.nallar."))
-			return true;
-
-		// TODO: Extensibility, need to add to API for patcher use?
-
-		return false;
+		return !(name.startsWith("java.") || name.startsWith("javax."));
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -208,6 +199,8 @@ public enum LaunchClassLoaderUtil {
 	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
 		if (srgTransformers == null)
 			throw new RuntimeException("Tried to call transformUpToSrg too early - haven't build SRG transformer list yet");
+		if (basicClass == null)
+			return null;
 
 		for (final IClassTransformer transformer : srgTransformers) {
 			basicClass = runTransformer(name, transformedName, basicClass, transformer);
