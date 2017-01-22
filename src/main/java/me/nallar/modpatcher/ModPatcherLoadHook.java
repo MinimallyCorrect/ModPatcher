@@ -12,6 +12,7 @@ class ModPatcherLoadHook {
 		if (API_VERSION != apiVersion) {
 			PatcherLog.warn("API version mismatch. Expected " + API_VERSION + ", got " + apiVersion);
 			PatcherLog.warn("API was loaded from: " + JavaTransformer.pathFromClass(ModPatcher.class));
+			PatcherLog.warn("Updating the mod which contains the outdated ModPatcher API should fix this warning");
 		}
 
 		ModPatcher.Version current = ModPatcher.Version.of(VERSION);
