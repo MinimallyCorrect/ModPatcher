@@ -142,15 +142,6 @@ public enum LaunchClassLoaderUtil {
 		}
 	}
 
-	public static boolean excluded(String name) {
-		for (final String exception : getClassLoaderExceptions()) {
-			if (name.startsWith(exception)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public static boolean allowedForSrg(String name) {
 		if (name.startsWith("javax.") || name.startsWith("java."))
 			return false;
