@@ -103,6 +103,10 @@ class ModPatcherTransformer {
 			return;
 		classLoaderInitialised = true;
 
+		classLoader.addTransformerExclusion("me.nallar.whocalled.");
+		classLoader.addTransformerExclusion("me.nallar.javatransformer.");
+		classLoader.addTransformerExclusion("me.nallar.javapatcher.");
+		classLoader.addTransformerExclusion("me.nallar.mixin.");
 		classLoader.addTransformerExclusion("javassist.");
 		classLoader.addTransformerExclusion("com.github.javaparser.");
 
