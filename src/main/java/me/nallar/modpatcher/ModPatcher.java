@@ -24,19 +24,23 @@ import java.util.concurrent.*;
  * It automatically downloads ModPatcher if the file is missing from the libs folder, or a coremod depends on
  * a newer version of modpatcher than the installed version
  *
- * This behaviour can be disabled by creating the file "libs/modpatcher/NEVER_UPDATE.txt"
+ * This behaviour can be disabled by creating the file "mods/ModPatcher_NEVER_UPDATE.txt"
  */
 public class ModPatcher {
 	private static final int API_VERSION = 1;
 	private static final Logger log = LogManager.getLogger("ModPatcher");
-	private static final String mcVersion = "@MC_VERSION@";
-	private static final Path neverUpdatePath = realPath("mods/ModPatcher_NEVER_UPDATE.txt");
-	private static final Path modPatcherPath = realPath("mods/ModPatcher.jlib");
+	private static final String MC_VERSION = "@MC_VERSION@";
+	private static final String MODPATCHER_NEVER_UPDATE_NAME = "ModPatcher_NEVER_UPDATE.txt";
+	private static final String MODPATCHER_LIB_NAME = "ModPatcher.jlib";
+	private static final Path neverUpdatePath = realPath("mods/" + MODPATCHER_NEVER_UPDATE_NAME);
+	private static final Path modPatcherPath = realPath("mods/" + MODPATCHER_LIB_NAME);
 	private static final boolean modPatcherPresent = Files.exists(modPatcherPath);
 	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!modPatcherPresent);
 	private static final String DOWNLOAD_URL_PROPERTY = "modpatcher.downloadUrl";
+	private static final String DOWNLOAD_URL_DEFAULT = "https://modpatcher.nallar.me/%1/ModPatcher-lib.jar";
 	private static final String REQUIRED_VERSION_PROPERTY = "modpatcher.requiredVersion";
 	private static final String RELEASE_PROPERTY = "modpatcher.release";
+	private static final String VERSION_URL_DEFAULT = "https://modpatcher.nallar.me/%s/version.txt";
 	private static final String VERSION_URL_PROPERTY = "modpatcher.versionUrl";
 	private static final String NEVER_UPDATE_PROPERTY = "modpatcher.neverUpdate";
 	private static final String DEFAULT_RELEASE = "stable";
@@ -202,8 +206,11 @@ public class ModPatcher {
 	private static void loadModPatcher() {
 		if (neverUpdate() && !modPatcherPresent)
 			throw new Error(
-				"ModPatcher is set to never update, but the ModPatcher library (ModPatcher.jlib) is not in the mods folder.\n" +
-					"As automatic updating is disabled, we can not retrieve a compatible version of ModPatcher."
+				"ModPatcher is set to never update as " + MODPATCHER_NEVER_UPDATE_NAME + " exists, but the ModPatcher " +
+					"library (" + MODPATCHER_LIB_NAME + ") is not in the mods folder.\n" +
+					"As automatic updating is disabled, we can not retrieve a compatible version of ModPatcher.\n" +
+					"Please place a compatible version of ModPatcher-lib in the mods folder and rename it to " +
+					MODPATCHER_LIB_NAME
 			);
 
 		download();
@@ -216,7 +223,7 @@ public class ModPatcher {
 	}
 
 	private static String getModPatcherRelease() {
-		return mcVersion + '-' + (modPatcherRelease == null ? DEFAULT_RELEASE : modPatcherRelease);
+		return MC_VERSION + '-' + (modPatcherRelease == null ? DEFAULT_RELEASE : modPatcherRelease);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -284,7 +291,8 @@ public class ModPatcher {
 		if (!isDownloadNeeded())
 			return;
 
-		try (InputStream in = new URL(System.getProperty(DOWNLOAD_URL_PROPERTY, "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/ModPatcher-lib.jar")).openConnection().getInputStream()) {
+		String url = String.format(System.getProperty(DOWNLOAD_URL_PROPERTY, DOWNLOAD_URL_DEFAULT), getModPatcherRelease());
+		try (InputStream in = new URL(url).openConnection().getInputStream()) {
 			Files.deleteIfExists(modPatcherPath);
 			Files.createDirectories(modPatcherPath.getParent());
 			Files.copy(in, modPatcherPath);
@@ -332,7 +340,8 @@ public class ModPatcher {
 					}
 					if (requiredVersion.newerThan(current)) {
 						try {
-							Version online = new Version(Resources.toString(new URL(System.getProperty(VERSION_URL_PROPERTY, "https://modpatcher.nallar.me/" + getModPatcherRelease() + "/version.txt")), Charsets.UTF_8).trim());
+							String url = String.format(System.getProperty(VERSION_URL_PROPERTY, VERSION_URL_DEFAULT), getModPatcherRelease());
+							Version online = new Version(Resources.toString(new URL(url), Charsets.UTF_8).trim());
 							return online.compareTo(current) > 0;
 						} catch (InterruptedIOException ignored) {
 						} catch (Throwable t) {
