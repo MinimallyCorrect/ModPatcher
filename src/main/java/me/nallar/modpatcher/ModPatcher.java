@@ -37,7 +37,7 @@ public class ModPatcher {
 	private static final boolean modPatcherPresent = Files.exists(modPatcherPath);
 	private static final Future<Boolean> defaultUpdateRequired = CompletableFuture.completedFuture(!modPatcherPresent);
 	private static final String DOWNLOAD_URL_PROPERTY = "modpatcher.downloadUrl";
-	private static final String DOWNLOAD_URL_DEFAULT = "https://modpatcher.nallar.me/%1/ModPatcher-lib.jar";
+	private static final String DOWNLOAD_URL_DEFAULT = "https://modpatcher.nallar.me/%s/ModPatcher-lib.jar";
 	private static final String REQUIRED_VERSION_PROPERTY = "modpatcher.requiredVersion";
 	private static final String RELEASE_PROPERTY = "modpatcher.release";
 	private static final String VERSION_URL_DEFAULT = "https://modpatcher.nallar.me/%s/version.txt";
