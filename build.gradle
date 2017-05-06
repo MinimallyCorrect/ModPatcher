@@ -100,7 +100,8 @@ jar.doFirst {
 	if (
 	!file(mappingsPath + 'fields.csv').exists() ||
 		!file(mappingsPath + 'methods.csv').exists() ||
-		!file('./generated/extendsMap.obj').exists() ||
+		!file('./generated/extendsMap.obj.lzma').exists() ||
+		!file('./generated/minecraft_stubs.jar.lzma').exists() ||
 		(!file(srgPath).exists() && !file(altSrgPath).exists())
 	)
 		throw new Error("Can't find mappings at $mappingsPath and/or $srgPath and/or $altSrgPath and/or extendsMap")
@@ -117,8 +118,8 @@ jar {
 	from altSrgPath
 	from mappingsPath + 'methods.csv'
 	from mappingsPath + 'fields.csv'
-	from './generated/extendsMap.obj'
-	from './generated/minecraft_stubs.jar'
+	from './generated/extendsMap.obj.lzma'
+	from './generated/minecraft_stubs.jar.lzma'
 }
 
 processResources {
