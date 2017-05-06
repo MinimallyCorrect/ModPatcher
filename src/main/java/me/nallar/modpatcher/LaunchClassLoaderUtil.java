@@ -1,6 +1,8 @@
 package me.nallar.modpatcher;
 
 import com.google.common.base.Joiner;
+import lombok.SneakyThrows;
+import lombok.val;
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -9,6 +11,8 @@ import org.apache.logging.log4j.Level;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.nio.file.FileSystem;
+import java.nio.file.*;
 import java.util.*;
 
 public enum LaunchClassLoaderUtil {
@@ -75,7 +79,7 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static void dumpTransformersIfEnabled() {
-		if (System.getProperty(DUMP_TRANSFORMERS_PROPERTY_NAME) != null)
+		if (!"false".equalsIgnoreCase(System.getProperty(DUMP_TRANSFORMERS_PROPERTY_NAME)))
 			PatcherLog.info("Transformers: " + transformers.toString(), new Throwable());
 	}
 
@@ -198,7 +202,7 @@ public enum LaunchClassLoaderUtil {
 
 	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
 		if (srgTransformers == null)
-			throw new RuntimeException("Tried to call transformUpToSrg too early - haven't build SRG transformer list yet");
+			throw new RuntimeException("Tried to call transformUpToSrg too early - haven't built SRG transformer list yet");
 		if (basicClass == null)
 			return null;
 
@@ -206,6 +210,30 @@ public enum LaunchClassLoaderUtil {
 			basicClass = runTransformer(name, transformedName, basicClass, transformer);
 		}
 		return basicClass;
+	}
+
+	private static String classNameToResourceName(String name) {
+		return name.replace('.', '/') + ".class";
+	}
+
+	private static FileSystem stubs;
+
+	@SneakyThrows
+	private static byte[] getStubSrgBytes(String name) {
+		if (stubs == null) {
+			Path extracted = Paths.get("./libraries/minecraft_stubs.jar");
+			if (!Files.exists(extracted)) {
+				Files.createDirectory(extracted.getParent());
+				Files.copy(LaunchClassLoaderUtil.class.getResourceAsStream("/minecraft_stubs.jar"), extracted);
+			}
+			stubs = FileSystems.newFileSystem(extracted, null);
+		}
+
+		try {
+			return Files.readAllBytes(stubs.getPath(classNameToResourceName(name)));
+		} catch (NoSuchFileException ignored) {
+			return null;
+		}
 	}
 
 	public static byte[] getSrgBytes(String name, boolean allowRetransform) {
@@ -223,8 +251,16 @@ public enum LaunchClassLoaderUtil {
 		if (cached != null || !allowRetransform) {
 			return cached;
 		}
+		val stubBytes = getStubSrgBytes(transformedName);
+		if (stubBytes != null) {
+			return stubBytes;
+		}
 		try {
 			byte[] bytes = getClassBytes(name);
+
+			if (name.equals(transformedName))
+				return bytes;
+
 			return transformUpToSrg(name, transformedName, bytes);
 		} catch (Throwable t) {
 			throw new RuntimeException(t);
@@ -232,8 +268,6 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static void cacheSrgBytes(String transformedName, byte[] bytes) {
-		// TODO: Cache for this (and the javassist classpool too?) should be wiped out after worlds load?
-
 		if (!allowedForSrg(transformedName)) {
 			return;
 		}
