@@ -3,10 +3,13 @@ package me.nallar.modpatcher;
 import LZMA.LzmaInputStream;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import lombok.SneakyThrows;
+import lombok.val;
 import me.nallar.javapatcher.mappings.ClassDescription;
 import me.nallar.javapatcher.mappings.FieldDescription;
 import me.nallar.javapatcher.mappings.Mappings;
 import me.nallar.javapatcher.mappings.MethodDescription;
+import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
 import java.io.*;
 import java.util.*;
@@ -24,15 +27,21 @@ class MCPMappings extends Mappings {
 	private final Map<FieldDescription, FieldDescription> fieldSrgMappings = new HashMap<>();
 	private final Map<String, MethodDescription> parameterlessSrgMethodMappings = new HashMap<>();
 	private final Map<String, String> shortClassNameToFullName = new HashMap<>();
-	private final Map<String, List<String>> extendsMap;
+	private final Map<String, List<String>> extendsMap = new HashMap<>();
 
+	MCPMappings(boolean loadDefault) {
+		if (loadDefault)
+			loadDefault();
+	}
+
+	@SneakyThrows
 	@SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
-	public MCPMappings() throws IOException {
-		extendsMap = loadExtends(new LzmaInputStream(Mappings.class.getResourceAsStream("/extendsMap.obj.lzma")));
+	private void loadDefault() {
 		try {
+			extendsMap.putAll(loadExtends(new LzmaInputStream(Mappings.class.getResourceAsStream("/extendsMap.obj.lzma"))));
 			loadCsv(Mappings.class.getResourceAsStream("/methods.csv"), methodSeargeMappings);
 			loadCsv(Mappings.class.getResourceAsStream("/fields.csv"), fieldSeargeMappings);
-			loadSrg(Mappings.class.getResourceAsStream("/notch-srg.srg"));
+			loadSrg(new LzmaInputStream(FMLInjectionData.class.getResourceAsStream("/deobfuscation_data-" + FMLInjectionData.data()[4] + ".lzma")));
 		} catch (Exception e) {
 			PatcherLog.error("Failed to load MCP mappings", e);
 		}
@@ -56,20 +65,26 @@ class MCPMappings extends Mappings {
 		mappingsCsv.close();
 	}
 
-	private Map<String, List<String>> loadExtends(InputStream resourceAsStream) throws IOException {
-		try (ObjectInputStream objectInputStream = new ObjectInputStream(resourceAsStream)) {
-			@SuppressWarnings("unchecked")
-			Map<String, String> reversed = (Map<String, String>) objectInputStream.readObject();
-			Map<String, List<String>> extendsMap = new HashMap<>();
-			for (Map.Entry<String, String> e : reversed.entrySet()) {
-				List<String> l = extendsMap.computeIfAbsent(e.getValue(), k -> new ArrayList<>());
-				l.add(e.getKey());
+	Map<String, List<String>> loadExtends(InputStream resourceAsStream) throws IOException {
+		try (val reader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+			while (true) {
+				val line = reader.readLine();
+				if (line == null)
+					break;
+				if (line.isEmpty())
+					continue;
+
+				val split = line.indexOf('^');
+				if (split == -1)
+					continue;
+
+				val a = line.substring(0, split);
+				val b = line.substring(split + 1);
+
+				extendsMap.computeIfAbsent(b, k -> new ArrayList<>()).add(a);
 			}
 			return extendsMap;
-		} catch (ClassNotFoundException e) {
-			PatcherLog.error("Failed to read extends mapping", e);
 		}
-		return null;
 	}
 
 	@Override
