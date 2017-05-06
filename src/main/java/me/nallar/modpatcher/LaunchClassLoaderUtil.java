@@ -1,5 +1,6 @@
 package me.nallar.modpatcher;
 
+import LZMA.LzmaInputStream;
 import com.google.common.base.Joiner;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -224,7 +225,7 @@ public enum LaunchClassLoaderUtil {
 			Path extracted = Paths.get("./libraries/minecraft_stubs.jar");
 			if (!Files.exists(extracted)) {
 				Files.createDirectory(extracted.getParent());
-				Files.copy(LaunchClassLoaderUtil.class.getResourceAsStream("/minecraft_stubs.jar"), extracted);
+				Files.copy(new LzmaInputStream(LaunchClassLoaderUtil.class.getResourceAsStream("/minecraft_stubs.jar.lzma")), extracted);
 			}
 			stubs = FileSystems.newFileSystem(extracted, null);
 		}

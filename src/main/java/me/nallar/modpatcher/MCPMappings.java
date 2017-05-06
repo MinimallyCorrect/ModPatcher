@@ -1,5 +1,6 @@
 package me.nallar.modpatcher;
 
+import LZMA.LzmaInputStream;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import me.nallar.javapatcher.mappings.ClassDescription;
@@ -27,7 +28,7 @@ class MCPMappings extends Mappings {
 
 	@SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
 	public MCPMappings() throws IOException {
-		extendsMap = loadExtends(Mappings.class.getResourceAsStream("/extendsMap.obj"));
+		extendsMap = loadExtends(new LzmaInputStream(Mappings.class.getResourceAsStream("/extendsMap.obj.lzma")));
 		try {
 			loadCsv(Mappings.class.getResourceAsStream("/methods.csv"), methodSeargeMappings);
 			loadCsv(Mappings.class.getResourceAsStream("/fields.csv"), fieldSeargeMappings);
