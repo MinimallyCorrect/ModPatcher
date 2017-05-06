@@ -93,16 +93,13 @@ if (System.env.GRADLE_USER_HOME) {
 	ext.homeDir = System.properties['user.home'] + '/.gradle/'
 }
 ext.mappingsPath = homeDir + 'caches/minecraft/de/oceanlabs/mcp/mcp_' + mappings_channel + '/' + mappings_version + '/'
-ext.srgPath = mappingsPath + 'srgs/notch-srg.srg'
-ext.altSrgPath = mappingsPath + "$mcVersion/srgs/notch-srg.srg"
 
 jar.doFirst {
 	if (
 	!file(mappingsPath + 'fields.csv').exists() ||
 		!file(mappingsPath + 'methods.csv').exists() ||
 		!file('./generated/extendsMap.obj.lzma').exists() ||
-		!file('./generated/minecraft_stubs.jar.lzma').exists() ||
-		(!file(srgPath).exists() && !file(altSrgPath).exists())
+		!file('./generated/minecraft_stubs.jar.lzma').exists()
 	)
 		throw new Error("Can't find mappings at $mappingsPath and/or $srgPath and/or $altSrgPath and/or extendsMap")
 }
@@ -114,8 +111,6 @@ jar {
 	}) {
 		exclude "META-INF/**"
 	}
-	from srgPath
-	from altSrgPath
 	from mappingsPath + 'methods.csv'
 	from mappingsPath + 'fields.csv'
 	from './generated/extendsMap.obj.lzma'

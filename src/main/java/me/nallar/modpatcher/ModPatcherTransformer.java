@@ -26,7 +26,7 @@ class ModPatcherTransformer {
 		checkForMultipleClassLoads();
 
 		try {
-			patcher = new Patcher(pool = new ClassLoaderPool(), Patches.class, new MCPMappings());
+			patcher = new Patcher(pool = new ClassLoaderPool(), Patches.class, new MCPMappings(true));
 
 			// TODO - issue #2. Determine layout/config file structure
 			recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY), patcher);
