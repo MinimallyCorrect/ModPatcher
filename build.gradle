@@ -7,7 +7,7 @@ buildscript {
 		}
 		maven {
 			name = "nallar"
-			url = "http://repo.nallar.me/"
+			url = "https://repo.nallar.me/"
 		}
 	}
 	configurations.all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
@@ -30,9 +30,9 @@ ext.url = 'http://nallar.me/minecraft'
 ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
 ext.mcVersion = '1.10.2'
-ext.forgeVersion = "12.18.1.2076"
+ext.forgeVersion = "12.18.3.2281"
 ext.mappings_channel = "snapshot"
-ext.mappings_version = "20160518"
+ext.mappings_version = "20161111"
 ext.mappings = mappings_channel + '_' + mappings_version
 ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 
@@ -62,6 +62,7 @@ minecraft {
 modpatcher {
 	extractGeneratedSources = true
 	generateInheritanceHierarchy = true
+	generateStubMinecraftClasses = true
 }
 
 sourceCompatibility = 1.8
@@ -117,6 +118,7 @@ jar {
 	from mappingsPath + 'methods.csv'
 	from mappingsPath + 'fields.csv'
 	from './generated/extendsMap.obj'
+	from './generated/minecraft_stubs.jar'
 }
 
 processResources {
@@ -202,5 +204,5 @@ tasks.withType(Jar) {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '3.0'
+	gradleVersion = '3.5'
 }
