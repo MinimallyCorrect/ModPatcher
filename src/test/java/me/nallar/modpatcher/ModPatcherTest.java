@@ -2,11 +2,13 @@ package me.nallar.modpatcher;
 
 import LZMA.LzmaInputStream;
 import lombok.SneakyThrows;
+import lombok.val;
 import me.nallar.modpatcher.ModPatcher.Version;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.*;
 
 public class ModPatcherTest {
 	@Test
@@ -27,6 +29,8 @@ public class ModPatcherTest {
 	@SneakyThrows
 	@Test
 	public void testMappings() {
-		new MCPMappings(false).loadExtends(new LzmaInputStream(new FileInputStream("./generated/extendsMap.obj.lzma")));
+		MCPMappings.loadExtends(new LzmaInputStream(new FileInputStream("./generated/extendsMap.obj.lzma")), new HashMap<>());
+		MCPMappings.loadCsv(new LzmaInputStream(new FileInputStream("./generated/fields.csv.lzma")), new HashMap<>());
+		MCPMappings.loadCsv(new LzmaInputStream(new FileInputStream("./generated/methods.csv.lzma")), new HashMap<>());
 	}
 }
