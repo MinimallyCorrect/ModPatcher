@@ -81,7 +81,7 @@ public enum LaunchClassLoaderUtil {
 
 	public static void dumpTransformersIfEnabled() {
 		if (!"false".equalsIgnoreCase(System.getProperty(DUMP_TRANSFORMERS_PROPERTY_NAME)))
-			PatcherLog.info("Transformers: " + transformers.toString(), new Throwable());
+			PatcherLog.info("Transformers: " + transformers.toString());
 	}
 
 	@SuppressWarnings("unchecked")
