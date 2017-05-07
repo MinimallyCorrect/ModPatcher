@@ -29,18 +29,12 @@ class MCPMappings extends Mappings {
 	private final Map<String, String> shortClassNameToFullName = new HashMap<>();
 	private final Map<String, List<String>> extendsMap = new HashMap<>();
 
-	MCPMappings(boolean loadDefault) {
-		if (loadDefault)
-			loadDefault();
-	}
-
 	@SneakyThrows
-	@SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
-	private void loadDefault() {
+	MCPMappings() {
 		try {
-			extendsMap.putAll(loadExtends(new LzmaInputStream(Mappings.class.getResourceAsStream("/extendsMap.obj.lzma"))));
-			loadCsv(Mappings.class.getResourceAsStream("/methods.csv"), methodSeargeMappings);
-			loadCsv(Mappings.class.getResourceAsStream("/fields.csv"), fieldSeargeMappings);
+			loadExtends(new LzmaInputStream(Mappings.class.getResourceAsStream("/extendsMap.obj.lzma")), extendsMap);
+			loadCsv(new LzmaInputStream(Mappings.class.getResourceAsStream("/methods.csv.lzma")), methodSeargeMappings);
+			loadCsv(new LzmaInputStream(Mappings.class.getResourceAsStream("/fields.csv.lzma")), fieldSeargeMappings);
 			loadSrg(new LzmaInputStream(FMLInjectionData.class.getResourceAsStream("/deobfuscation_data-" + FMLInjectionData.data()[4] + ".lzma")));
 		} catch (Exception e) {
 			PatcherLog.error("Failed to load MCP mappings", e);
@@ -49,7 +43,7 @@ class MCPMappings extends Mappings {
 		fieldSeargeMappings.clear();
 	}
 
-	private static void loadCsv(InputStream mappingsCsv, Map<String, String> seargeMappings) throws IOException {
+	static void loadCsv(InputStream mappingsCsv, Map<String, String> seargeMappings) throws IOException {
 		try (Scanner in = new Scanner(mappingsCsv)) {
 			in.useDelimiter(",");
 			while (in.hasNextLine()) {
@@ -65,7 +59,7 @@ class MCPMappings extends Mappings {
 		mappingsCsv.close();
 	}
 
-	Map<String, List<String>> loadExtends(InputStream resourceAsStream) throws IOException {
+	static void loadExtends(InputStream resourceAsStream, Map<String, List<String>> extendsMap) throws IOException {
 		try (val reader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
 			while (true) {
 				val line = reader.readLine();
@@ -83,7 +77,6 @@ class MCPMappings extends Mappings {
 
 				extendsMap.computeIfAbsent(b, k -> new ArrayList<>()).add(a);
 			}
-			return extendsMap;
 		}
 	}
 

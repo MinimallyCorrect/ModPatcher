@@ -1,3 +1,8 @@
+import lzma.sdk.lzma.Encoder
+import lzma.streams.LzmaOutputStream
+
+import java.nio.file.Files
+
 buildscript {
 	repositories {
 		jcenter()
@@ -104,15 +109,45 @@ jar.doFirst {
 		throw new Error("Can't find mappings at $mappingsPath and/or $srgPath and/or $altSrgPath and/or extendsMap")
 }
 
+static Encoder getEncoder() {
+	Encoder encoder = new Encoder()
+	encoder.setDictionarySize(1 << 23)
+	encoder.setEndMarkerMode(true)
+	encoder.setMatchFinder(Encoder.EMatchFinderTypeBT4)
+	encoder.setNumFastBytes(0x20)
+	return encoder
+}
+
+static File lzma(String name) {
+	File from = new File(name)
+	File to = new File("./generated/" + from.getName() + ".lzma")
+
+	if (!to.exists() || to.lastModified() != from.lastModified()) {
+		to.getParentFile().mkdir()
+		OutputStream stream = new LzmaOutputStream(new FileOutputStream(to), getEncoder())
+		try {
+			Files.copy(from.toPath(), stream)
+		} finally {
+			stream.flush()
+			stream.close()
+		}
+		to.setLastModified(from.lastModified())
+	}
+
+	return to
+}
+
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	from((configurations.runtime - configurations.provided).filter { it.exists() }.collect {
 		it.isDirectory() ? it : zipTree(it)
 	}) {
 		exclude "META-INF/**"
+		exclude "org/objectweb/asm/**"
+		exclude "com/github/javaparser/**"
 	}
-	from mappingsPath + 'methods.csv'
-	from mappingsPath + 'fields.csv'
+	from lzma(mappingsPath + 'methods.csv')
+	from lzma(mappingsPath + 'fields.csv')
 	from './generated/extendsMap.obj.lzma'
 	from './generated/minecraft_stubs.jar.lzma'
 }
