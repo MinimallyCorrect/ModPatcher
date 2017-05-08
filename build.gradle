@@ -144,7 +144,6 @@ jar {
 	}) {
 		exclude "META-INF/**"
 		exclude "org/objectweb/asm/**"
-		exclude "com/github/javaparser/**"
 	}
 	from lzma(mappingsPath + 'methods.csv')
 	from lzma(mappingsPath + 'fields.csv')
