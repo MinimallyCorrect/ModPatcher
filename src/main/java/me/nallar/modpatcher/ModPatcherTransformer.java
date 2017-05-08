@@ -143,16 +143,16 @@ class ModPatcherTransformer {
 
 			final byte[] originalBytes = bytes;
 			if (mixinApplicator != null) {
-				bytes = getMixinApplicator().getMixinTransformer().transformClass(() -> originalBytes, name).get();
+				bytes = getMixinApplicator().getMixinTransformer().transformClass(() -> originalBytes, transformedName).get();
 			}
 
-			LaunchClassLoaderUtil.cacheSrgBytes(name, bytes);
+			LaunchClassLoaderUtil.cacheSrgBytes(transformedName, bytes);
 			try {
-				bytes = patcher.patch(name, bytes);
+				bytes = patcher.patch(transformedName, bytes);
 			} catch (Throwable t) {
-				PatcherLog.error("Failed to patch " + name, t);
+				PatcherLog.error("Failed to patch " + transformedName, t);
 			} finally {
-				LaunchClassLoaderUtil.releaseSrgBytes(name);
+				LaunchClassLoaderUtil.releaseSrgBytes(transformedName);
 			}
 
 			if (originalBytes != bytes)
