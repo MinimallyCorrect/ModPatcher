@@ -1,14 +1,11 @@
 package me.nallar.modpatcher;
 
 import LZMA.LzmaInputStream;
-import com.google.common.base.Joiner;
 import lombok.SneakyThrows;
 import lombok.val;
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
-import org.apache.logging.log4j.Level;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -18,19 +15,7 @@ import java.util.*;
 
 public enum LaunchClassLoaderUtil {
 	;
-	private static final String SPONGEPOWERED_MIXIN_TRANSFORMER_NAME = "org.spongepowered.asm.mixin.transformer.MixinTransformer$Proxy";
-	private static final String DEOBF_TRANSFORMER_NAME = "net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer";
 	private static final boolean DUMP_JAVASSIST_LOADED_CLASSES = Boolean.parseBoolean(System.getProperty("nallar.LaunchClassLoaderUtil.dumpJavassistLoadedClasses", "false"));
-	private static final List<String> DEOBF_TRANSFORMER_NAMES = Arrays.asList(
-		DEOBF_TRANSFORMER_NAME,
-		SPONGEPOWERED_MIXIN_TRANSFORMER_NAME
-	);
-	private static final List<String> WHITELISTED_TRANSFORMERS = Arrays.asList(
-		"net.minecraftforge.fml.common.asm.transformers.PatchingTransformer",
-		"net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer"
-	);
-	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
-	private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.alreadyLoaded";
 	private static final String DUMP_TRANSFORMERS_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.dumpTransformers";
 	private static final String WARN_INCONSISTENT_TRANSFORMATION_PROPERTY_NAME = "nallar.LaunchClassLoaderUtil.warnForInconsistentTransformation";
@@ -38,7 +23,6 @@ public enum LaunchClassLoaderUtil {
 	static LaunchClassLoader instance;
 
 	private static List<IClassTransformer> transformers;
-	private static IClassTransformer[] srgTransformers;
 	private static IClassNameTransformer renameTransformer;
 	private static Set<String> classLoaderExceptions;
 	private static Set<String> transformerExceptions;
@@ -54,29 +38,9 @@ public enum LaunchClassLoaderUtil {
 	}
 
 	public static void addTransformer(IClassTransformer transformer) {
-		List<IClassTransformer> transformers = LaunchClassLoaderUtil.getTransformers();
-
-		int target = -1;
-		for (int i = 0; i < transformers.size(); i++) {
-			IClassTransformer current = transformers.get(i);
-
-			if (current == transformer)
-				transformers.remove(i--);
-
-			String className = current.getClass().getName();
-			if (DEOBF_TRANSFORMER_NAMES.contains(className))
-				target = i;
-		}
-
-		if (target == -1) {
-			PatcherLog.warn("Didn't find deobfuscation transformers " + DEOBF_TRANSFORMER_NAMES.toString() + " in transformers list.\n" +
-				"Did you forget to set the SortingIndex for your coremod >= 1001? This message is expected in a deobf environment.");
-			transformers.add(transformer);
-		} else {
-			transformers.add(target + 1, transformer);
-		}
-
-		buildSrgTransformList();
+		List<IClassTransformer> transformers = getTransformers();
+		transformers.remove(transformer);
+		transformers.add(transformer);
 	}
 
 	public static void dumpTransformersIfEnabled() {
@@ -150,67 +114,15 @@ public enum LaunchClassLoaderUtil {
 		return !(name.startsWith("java.") || name.startsWith("javax."));
 	}
 
-	@SuppressWarnings("ConstantConditions")
-	private static byte[] runTransformer(final String name, final String transformedName, byte[] basicClass, final IClassTransformer transformer) {
-		try {
-			return transformer.transform(name, transformedName, basicClass);
-		} catch (Throwable t) {
-			String message = t.getMessage();
-			if (message != null && message.contains("for invalid side")) {
-				if (t instanceof RuntimeException) {
-					throw (RuntimeException) t;
-				} else if (t instanceof Error) {
-					throw (Error) t;
-				} else {
-					throw new RuntimeException(t);
-				}
-			} else if (basicClass != null || DEBUG_FINER) {
-				FMLRelaunchLog.log((DEBUG_FINER && basicClass != null) ? Level.WARN : Level.TRACE, t, "Failed to transform " + name);
-			}
-			return basicClass;
-		}
-	}
-
-	public static void buildSrgTransformList() {
-		List<IClassTransformer> result = new ArrayList<>();
-
-		Iterable<IClassTransformer> transformers = getTransformers();
-		for (final IClassTransformer transformer : transformers) {
-			if (transformer == ModPatcherTransformer.getInstance()) {
-				srgTransformers = result.toArray(new IClassTransformer[0]);
-				return;
-			}
-
-			if (whitelisted(transformer))
-				result.add(transformer);
-
-			if (Objects.equals(transformer.getClass().getName(), DEOBF_TRANSFORMER_NAME)) {
-				srgTransformers = result.toArray(new IClassTransformer[0]);
-				return;
-			}
-		}
-
-		throw new RuntimeException("No SRG or ModPatcher transformer found when building SRG transformer list. " + Joiner.on(",\n").join(transformers));
-	}
-
-	private static boolean whitelisted(IClassTransformer transformer) {
-		for (String whitelistEntry : WHITELISTED_TRANSFORMERS)
-			if (transformer.getClass().getName().startsWith(whitelistEntry))
-				return true;
-
-		return false;
-	}
-
 	private static byte[] transformUpToSrg(final String name, final String transformedName, byte[] basicClass) {
-		if (srgTransformers == null)
-			throw new RuntimeException("Tried to call transformUpToSrg too early - haven't built SRG transformer list yet");
 		if (basicClass == null)
 			return null;
 
-		for (final IClassTransformer transformer : srgTransformers) {
-			basicClass = runTransformer(name, transformedName, basicClass, transformer);
-		}
-		return basicClass;
+		val renameTransformer = getRenameTransformer();
+		if (renameTransformer == null)
+			throw new RuntimeException("Tried to call transformUpToSrg too early - haven't built SRG transformer list yet");
+
+		return ((IClassTransformer) renameTransformer).transform(name, transformedName, basicClass);
 	}
 
 	private static String classNameToResourceName(String name) {
