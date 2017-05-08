@@ -109,6 +109,7 @@ class ModPatcherTransformer {
 			ModPatcherTransformer.mixinApplicator = mixinApplicator = new MixinApplicator();
 			mixinApplicator.setMakeAccessible(false);
 			mixinApplicator.setNoMixinIsError(true);
+			mixinApplicator.setLog(PatcherLog::info);
 		}
 
 		return mixinApplicator;
