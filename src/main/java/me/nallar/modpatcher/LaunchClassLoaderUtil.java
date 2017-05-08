@@ -224,7 +224,9 @@ public enum LaunchClassLoaderUtil {
 		if (stubs == null) {
 			Path extracted = Paths.get("./libraries/minecraft_stubs.jar");
 			if (!Files.exists(extracted)) {
-				Files.createDirectory(extracted.getParent());
+				if (!Files.isDirectory(extracted.getParent())) {
+					Files.createDirectory(extracted.getParent());
+				}
 				Files.copy(new LzmaInputStream(LaunchClassLoaderUtil.class.getResourceAsStream("/minecraft_stubs.jar.lzma")), extracted);
 			}
 			stubs = FileSystems.newFileSystem(extracted, null);
