@@ -54,6 +54,7 @@ class ModPatcherTransformer {
 		return patcher;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void recursivelyAddXmlFiles(File directory, Patcher patcher) {
 		File[] files = directory.listFiles();
 		if (files == null)
@@ -71,26 +72,6 @@ class ModPatcherTransformer {
 			}
 		} catch (IOException e) {
 			PatcherLog.warn("Failed to load patch", e);
-		}
-	}
-
-	static byte[] transformationHook(String name, byte[] originalBytes) {
-		LaunchClassLoaderUtil.cacheSrgBytes(name, originalBytes);
-
-		try {
-			if (mixinApplicator != null) {
-				final byte[] finalOriginalBytes = originalBytes;
-				originalBytes = getMixinApplicator().getMixinTransformer().transformClass(() -> finalOriginalBytes, name).get();
-			}
-
-			try {
-				return patcher.patch(name, originalBytes);
-			} catch (Throwable t) {
-				PatcherLog.error("Failed to patch " + name, t);
-			}
-			return originalBytes;
-		} finally {
-			LaunchClassLoaderUtil.releaseSrgBytes(name);
 		}
 	}
 
@@ -159,12 +140,24 @@ class ModPatcherTransformer {
 
 			dumpIfEnabled(transformedName + "_unpatched", bytes);
 
-			byte[] transformed = transformationHook(transformedName, bytes);
+			final byte[] originalBytes = bytes;
+			if (mixinApplicator != null) {
+				bytes = getMixinApplicator().getMixinTransformer().transformClass(() -> originalBytes, name).get();
+			}
 
-			if (bytes != transformed)
-				dumpIfEnabled(transformedName, transformed);
+			LaunchClassLoaderUtil.cacheSrgBytes(name, bytes);
+			try {
+				bytes = patcher.patch(name, bytes);
+			} catch (Throwable t) {
+				PatcherLog.error("Failed to patch " + name, t);
+			} finally {
+				LaunchClassLoaderUtil.releaseSrgBytes(name);
+			}
 
-			return transformed;
+			if (originalBytes != bytes)
+				dumpIfEnabled(transformedName, bytes);
+
+			return bytes;
 		}
 	}
 }
