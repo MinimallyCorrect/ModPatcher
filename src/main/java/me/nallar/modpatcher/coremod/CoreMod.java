@@ -1,7 +1,7 @@
 package me.nallar.modpatcher.coremod;
 
-import me.nallar.modpatcher.ModPatcher;
-import me.nallar.modpatcher.PatcherLog;
+import me.nallar.modpatcher.api.ModPatcher;
+import me.nallar.modpatcher.internal.PatcherLog;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.appender.FileAppender;
@@ -15,7 +15,6 @@ import java.util.*;
 @IFMLLoadingPlugin.SortingIndex(1001)
 public class CoreMod implements IFMLLoadingPlugin {
 	static {
-		ModPatcher.requireVersion("latest", "beta");
 		try {
 			logToFile();
 		} catch (Exception e) {

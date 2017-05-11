@@ -7,7 +7,7 @@ Add the following annotation to your IFMLLoadingPlugin.
 
 Change your IFMLLoadingPlugin's `getSetupClass(data)` method to:
 
-    return me.nallar.modpatcher.ModPatcher.getSetupClass()
+    return me.nallar.modpatcher.api.ModPatcher.getSetupClass()
 
 Load your patch files with ModPatcher in your IFMLLoadingPlugin's injectData method. For example:
 

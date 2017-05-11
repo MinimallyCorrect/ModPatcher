@@ -1,4 +1,4 @@
-package me.nallar.modpatcher;
+package me.nallar.modpatcher.internal;
 
 import LZMA.LzmaInputStream;
 import com.google.common.collect.BiMap;

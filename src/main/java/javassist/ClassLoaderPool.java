@@ -1,7 +1,7 @@
 package javassist;
 
-import me.nallar.modpatcher.LaunchClassLoaderUtil;
-import me.nallar.modpatcher.PatcherLog;
+import me.nallar.modpatcher.internal.LaunchClassLoaderUtil;
+import me.nallar.modpatcher.internal.PatcherLog;
 
 import java.io.*;
 import java.net.*;
