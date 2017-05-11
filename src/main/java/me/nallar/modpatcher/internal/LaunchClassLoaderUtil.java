@@ -1,4 +1,4 @@
-package me.nallar.modpatcher;
+package me.nallar.modpatcher.internal;
 
 import LZMA.LzmaInputStream;
 import lombok.SneakyThrows;
@@ -27,6 +27,7 @@ public enum LaunchClassLoaderUtil {
 	private static Set<String> classLoaderExceptions;
 	private static Set<String> transformerExceptions;
 	private static boolean warnedForInconsistentTransformation;
+	private static FileSystem stubs;
 
 	static {
 		boolean alreadyLoaded = System.getProperty(ALREADY_LOADED_PROPERTY_NAME) != null;
@@ -128,8 +129,6 @@ public enum LaunchClassLoaderUtil {
 	private static String classNameToResourceName(String name) {
 		return name.replace('.', '/') + ".class";
 	}
-
-	private static FileSystem stubs;
 
 	@SneakyThrows
 	private static byte[] getStubSrgBytes(String name) {

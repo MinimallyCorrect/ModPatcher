@@ -1,4 +1,4 @@
-package me.nallar.modpatcher;
+package me.nallar.modpatcher.internal;
 
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.Launch;
@@ -23,6 +23,7 @@ public class ModPatcherTweaker implements ITweaker {
 			Class<?> mixinEnvironmentClass = Class.forName("org.spongepowered.asm.mixin.MixinEnvironment", false, ModPatcherTweaker.class.getClassLoader());
 			Field f = mixinEnvironmentClass.getDeclaredField("excludeTransformers");
 			f.setAccessible(true);
+			@SuppressWarnings("unchecked")
 			Set<String> vals = (Set<String>) f.get(null);
 			vals.add(ModPatcherTransformer.class.getName());
 		} catch (ClassNotFoundException ignored) {

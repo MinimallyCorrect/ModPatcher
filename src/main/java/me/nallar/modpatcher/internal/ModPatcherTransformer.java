@@ -1,6 +1,7 @@
-package me.nallar.modpatcher;
+package me.nallar.modpatcher.internal;
 
 import javassist.ClassLoaderPool;
+import lombok.val;
 import me.nallar.javapatcher.patcher.Patcher;
 import me.nallar.javapatcher.patcher.Patches;
 import me.nallar.mixin.internal.MixinApplicator;
@@ -10,7 +11,7 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import java.io.*;
 import java.nio.file.*;
 
-class ModPatcherTransformer {
+public class ModPatcherTransformer {
 	public static final ClassLoaderPool pool;
 	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
 	private static final Patcher patcher;
@@ -50,7 +51,7 @@ class ModPatcherTransformer {
 		}
 	}
 
-	static Patcher getPatcher() {
+	public static Patcher getPatcher() {
 		return patcher;
 	}
 
@@ -79,17 +80,10 @@ class ModPatcherTransformer {
 		return ClassTransformer.INSTANCE;
 	}
 
-	static void initialiseClassLoader(LaunchClassLoader classLoader) {
+	public static void initialiseClassLoader(LaunchClassLoader classLoader) {
 		if (classLoaderInitialised)
 			return;
 		classLoaderInitialised = true;
-
-		classLoader.addTransformerExclusion("me.nallar.whocalled.");
-		classLoader.addTransformerExclusion("me.nallar.javatransformer.");
-		classLoader.addTransformerExclusion("me.nallar.javapatcher.");
-		classLoader.addTransformerExclusion("me.nallar.mixin.");
-		classLoader.addTransformerExclusion("javassist.");
-		classLoader.addTransformerExclusion("com.github.javaparser.");
 
 		LaunchClassLoaderUtil.instance = classLoader;
 		ModPatcherTweaker.add();
@@ -98,11 +92,11 @@ class ModPatcherTransformer {
 		LaunchClassLoaderUtil.removeRedundantExclusions();
 	}
 
-	static String getDefaultPatchesDirectory() {
+	public static String getDefaultPatchesDirectory() {
 		return MOD_PATCHES_DIRECTORY;
 	}
 
-	static MixinApplicator getMixinApplicator() {
+	public static MixinApplicator getMixinApplicator() {
 		MixinApplicator mixinApplicator = ModPatcherTransformer.mixinApplicator;
 
 		if (mixinApplicator == null) {
@@ -142,8 +136,9 @@ class ModPatcherTransformer {
 			dumpIfEnabled(transformedName + "_unpatched", bytes);
 
 			final byte[] originalBytes = bytes;
+			val mixinApplicator = ModPatcherTransformer.mixinApplicator;
 			if (mixinApplicator != null) {
-				bytes = getMixinApplicator().getMixinTransformer().transformClass(() -> originalBytes, transformedName).get();
+				bytes = mixinApplicator.getMixinTransformer().transformClass(() -> originalBytes, transformedName).get();
 			}
 
 			LaunchClassLoaderUtil.cacheSrgBytes(transformedName, bytes);

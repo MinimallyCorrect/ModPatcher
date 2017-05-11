@@ -52,7 +52,7 @@ version = mcVersion + '-SNAPSHOT'
 ext.versionWithBuildNumber = project.buildNumber != 0 ? project.version.replace("-SNAPSHOT", "") + "." + project.buildNumber : project.version
 ext.versionPath = "./build/version.txt"
 
-def versionFile = file(versionPath);
+def versionFile = file(versionPath)
 versionFile.getParentFile().mkdir()
 
 minecraft {
@@ -89,7 +89,7 @@ dependencies {
 	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
 	compile group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
 	provided group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
-	compile 'org.javassist:javassist:3.20.0-GA'
+	compile 'org.javassist:javassist:3.21.0-GA'
 }
 
 if (System.env.GRADLE_USER_HOME) {
@@ -171,7 +171,7 @@ tasks.withType(JavaCompile) {
 	targetCompatibility = 8
 	options.with {
 		encoding = 'UTF-8'
-		compilerArgs << "-Xlint:all" << "-Xlint:-classfile"
+		compilerArgs << "-Xlint:all" << "-Xlint:-classfile" << "-Xlint:-processing"
 	}
 }
 
@@ -185,9 +185,7 @@ def apiJarConfig = {
 		sourceSets.main.allSource
 		sourceSets.main.output
 	} {
-		include 'me/nallar/modpatcher/ModPatcher.*'
-		include 'me/nallar/modpatcher/ModPatcher$Version.*'
-		include 'me/nallar/modpatcher/ModPatcherSetup.*'
+		include 'me/nallar/modpatcher/api/*'
 	}
 }
 
