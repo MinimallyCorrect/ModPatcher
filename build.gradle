@@ -89,7 +89,7 @@ dependencies {
 	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
 	compile group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
 	provided group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
-	compile 'org.javassist:javassist:3.21.0-GA'
+	compile 'org.javassist:javassist:3.22.0-CR1'
 }
 
 if (System.env.GRADLE_USER_HOME) {
