@@ -18,10 +18,12 @@ buildscript {
 	configurations.all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-		classpath group: 'me.nallar', name: 'ModPatcherGradle', version: '0.1-SNAPSHOT', changing: true
+		classpath 'me.nallar:ModPatcherGradle:0.1-SNAPSHOT'
+		classpath 'me.nallar.libloader:LibLoaderGradle:0.1-SNAPSHOT'
 	}
 }
 apply plugin: 'me.nallar.ModPatcherGradle'
+apply plugin: 'me.nallar.libloader.LibLoaderGradle'
 apply plugin: 'maven'
 
 group = 'me.nallar'
@@ -50,10 +52,6 @@ ext.commit = System.getenv("GIT_COMMIT") ?: 'unknown'
 version = mcVersion + '-SNAPSHOT'
 
 ext.versionWithBuildNumber = project.buildNumber != 0 ? project.version.replace("-SNAPSHOT", "") + "." + project.buildNumber : project.version
-ext.versionPath = "./build/version.txt"
-
-def versionFile = file(versionPath)
-versionFile.getParentFile().mkdir()
 
 minecraft {
 	version = fullForgeVersion
@@ -86,10 +84,10 @@ configurations {
 
 dependencies {
 	testCompile 'junit:junit:4.12'
-	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
-	compile group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
+	libLoader group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
+	libLoader group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
+	libLoader 'org.javassist:javassist:3.22.0-CR1'
 	provided group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
-	compile 'org.javassist:javassist:3.22.0-CR1'
 }
 
 if (System.env.GRADLE_USER_HOME) {
@@ -139,12 +137,6 @@ static File lzma(String name) {
 
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	from((configurations.runtime - configurations.provided).filter { it.exists() }.collect {
-		it.isDirectory() ? it : zipTree(it)
-	}) {
-		exclude "META-INF/**"
-		exclude "org/objectweb/asm/**"
-	}
 	from lzma(mappingsPath + 'methods.csv')
 	from lzma(mappingsPath + 'fields.csv')
 	from './generated/extendsMap.obj.lzma'
@@ -156,7 +148,6 @@ processResources {
 	inputs.property "version", project.versionWithBuildNumber
 	inputs.property "mcversion", project.minecraft.version
 	println("Determined ModPatcher version: " + project.versionWithBuildNumber)
-	versionFile.text = project.versionWithBuildNumber
 
 	filesMatching("mcmod.info") {
 		expand 'version': project.versionWithBuildNumber, 'mcversion': project.minecraft.version, 'name': project.projectName
@@ -175,50 +166,6 @@ tasks.withType(JavaCompile) {
 	}
 }
 
-jar {
-	classifier = 'lib'
-}
-
-def apiJarConfig = {
-	classifier = 'api'
-	from {
-		sourceSets.main.allSource
-		sourceSets.main.output
-	} {
-		include 'me/nallar/modpatcher/api/*'
-	}
-}
-
-task apiJar(type: Jar, dependsOn: classes)
-
-apiJar apiJarConfig
-
-task coremodJar(type: Jar, dependsOn: classes)
-
-coremodJar apiJarConfig
-coremodJar {
-	classifier = 'coremod'
-	include 'me/nallar/modpatcher/coremod/*'
-	include 'mcmod.info'
-	include '*.example'
-}
-
-artifacts {
-	archives apiJar
-	archives coremodJar
-	archives jar
-	archives file(versionPath)
-}
-
-def installer = install.repositories.mavenInstaller
-
-[installer]*.pom*.whenConfigured {
-	p ->
-		p.dependencies = p.dependencies.findAll {
-			dep -> dep.artifactId == "junit"
-		}
-}
-
 tasks.withType(Jar) {
 	baseName = project.name
 	manifest.mainAttributes(
@@ -227,7 +174,6 @@ tasks.withType(Jar) {
 		"Implementation-Title": name,
 		"Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
 		"Implementation-Vendor": url,
-		"FMLCorePlugin": "me.nallar.modpatcher.coremod.CoreMod"
 	)
 }
 
