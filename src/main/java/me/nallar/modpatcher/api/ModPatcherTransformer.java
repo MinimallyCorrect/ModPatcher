@@ -1,17 +1,17 @@
 package me.nallar.modpatcher.api;
 
-import javassist.ClassLoaderPool;
 import lombok.val;
 import me.nallar.javapatcher.patcher.Patcher;
 import me.nallar.javapatcher.patcher.Patches;
 import me.nallar.mixin.internal.MixinApplicator;
+import me.nallar.modpatcher.api.tweaker.ModPatcherTweaker;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 
 import java.io.*;
 import java.nio.file.*;
 
-class ModPatcherTransformer {
+public class ModPatcherTransformer {
 	public static final ClassLoaderPool pool;
 	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
 	private static final Patcher patcher;
@@ -76,7 +76,7 @@ class ModPatcherTransformer {
 		}
 	}
 
-	static IClassTransformer getInstance() {
+	public static IClassTransformer getInstance() {
 		return ClassTransformer.INSTANCE;
 	}
 

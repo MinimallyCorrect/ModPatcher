@@ -1,5 +1,8 @@
-package me.nallar.modpatcher.api;
+package me.nallar.modpatcher.api.tweaker;
 
+import me.nallar.modpatcher.api.LaunchClassLoaderUtil;
+import me.nallar.modpatcher.api.ModPatcherTransformer;
+import me.nallar.modpatcher.api.PatcherLog;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
