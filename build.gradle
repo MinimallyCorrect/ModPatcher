@@ -68,6 +68,10 @@ modpatcher {
 	generateStubMinecraftClasses = true
 }
 
+libLoader {
+	bundleLibLoader = false
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
