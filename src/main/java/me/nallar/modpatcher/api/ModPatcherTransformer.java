@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.internal;
+package me.nallar.modpatcher.api;
 
 import javassist.ClassLoaderPool;
 import lombok.val;
@@ -11,7 +11,7 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import java.io.*;
 import java.nio.file.*;
 
-public class ModPatcherTransformer {
+class ModPatcherTransformer {
 	public static final ClassLoaderPool pool;
 	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
 	private static final Patcher patcher;
@@ -80,7 +80,7 @@ public class ModPatcherTransformer {
 		return ClassTransformer.INSTANCE;
 	}
 
-	public static void initialiseClassLoader(LaunchClassLoader classLoader) {
+	static void initialiseClassLoader(LaunchClassLoader classLoader) {
 		if (classLoaderInitialised)
 			return;
 		classLoaderInitialised = true;
@@ -92,11 +92,11 @@ public class ModPatcherTransformer {
 		LaunchClassLoaderUtil.removeRedundantExclusions();
 	}
 
-	public static String getDefaultPatchesDirectory() {
+	static String getDefaultPatchesDirectory() {
 		return MOD_PATCHES_DIRECTORY;
 	}
 
-	public static MixinApplicator getMixinApplicator() {
+	static MixinApplicator getMixinApplicator() {
 		MixinApplicator mixinApplicator = ModPatcherTransformer.mixinApplicator;
 
 		if (mixinApplicator == null) {

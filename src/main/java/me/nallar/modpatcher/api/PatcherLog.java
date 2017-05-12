@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.internal;
+package me.nallar.modpatcher.api;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -9,7 +9,7 @@ public class PatcherLog {
 	/*
 	 * This class might get classloaded twice under different classloaders. Don't do anything important in a static {} block.
 	 */
-	public static final Logger LOGGER = LogManager.getLogger("ModPatcher");
+	private static final Logger LOGGER = LogManager.getLogger("ModPatcher");
 
 	public static void error(String msg) {
 		LOGGER.error(msg);

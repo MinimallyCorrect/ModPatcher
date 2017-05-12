@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.internal;
+package me.nallar.modpatcher.api;
 
 import LZMA.LzmaInputStream;
 import lombok.SneakyThrows;

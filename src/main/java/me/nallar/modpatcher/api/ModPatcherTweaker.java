@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.internal;
+package me.nallar.modpatcher.api;
 
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.Launch;
@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Tries to ensure that our transformer is last
  */
-public class ModPatcherTweaker implements ITweaker {
+class ModPatcherTweaker implements ITweaker {
 	@SuppressWarnings("unchecked")
 	public static void add() {
 		((List<String>) Launch.blackboard.get("TweakClasses")).add(ModPatcherTweaker.class.getName());
