@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Tries to ensure that our transformer is last
  */
-class ModPatcherTweaker implements ITweaker {
+public class ModPatcherTweaker implements ITweaker {
 	@SuppressWarnings("unchecked")
 	public static void add() {
 		((List<String>) Launch.blackboard.get("TweakClasses")).add(ModPatcherTweaker.class.getName());
