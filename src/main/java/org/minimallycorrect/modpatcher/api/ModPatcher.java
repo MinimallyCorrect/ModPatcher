@@ -17,7 +17,7 @@ public class ModPatcher {
 	 * @return Name of the ModPatcher setup class
 	 */
 	public static String getSetupClass() {
-		return "ModPatcherSetup";
+		return "org.minimallycorrect.modpatcher.api.ModPatcherSetup";
 	}
 
 	/**
