@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.api;
+package org.minimallycorrect.modpatcher.api;
 
 import LZMA.LzmaInputStream;
 import lombok.SneakyThrows;

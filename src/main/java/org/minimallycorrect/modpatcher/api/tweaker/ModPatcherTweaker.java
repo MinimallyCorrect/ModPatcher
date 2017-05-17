@@ -1,11 +1,11 @@
-package me.nallar.modpatcher.api.tweaker;
+package org.minimallycorrect.modpatcher.api.tweaker;
 
-import me.nallar.modpatcher.api.LaunchClassLoaderUtil;
-import me.nallar.modpatcher.api.ModPatcherTransformer;
-import me.nallar.modpatcher.api.PatcherLog;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.minimallycorrect.modpatcher.api.LaunchClassLoaderUtil;
+import org.minimallycorrect.modpatcher.api.ModPatcherTransformer;
+import org.minimallycorrect.modpatcher.api.PatcherLog;
 
 import java.io.*;
 import java.lang.reflect.*;
