@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.api;
+package org.minimallycorrect.modpatcher.api;
 
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.fml.relauncher.IFMLCallHook;

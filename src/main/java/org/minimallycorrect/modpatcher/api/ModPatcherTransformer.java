@@ -1,12 +1,12 @@
-package me.nallar.modpatcher.api;
+package org.minimallycorrect.modpatcher.api;
 
 import lombok.val;
 import me.nallar.javapatcher.patcher.Patcher;
 import me.nallar.javapatcher.patcher.Patches;
-import me.nallar.mixin.internal.MixinApplicator;
-import me.nallar.modpatcher.api.tweaker.ModPatcherTweaker;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.minimallycorrect.mixin.internal.MixinApplicator;
+import org.minimallycorrect.modpatcher.api.tweaker.ModPatcherTweaker;
 
 import java.io.*;
 import java.nio.file.*;

@@ -18,22 +18,21 @@ buildscript {
 	configurations.all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-		classpath 'me.nallar:ModPatcherGradle:0.1-SNAPSHOT'
-		classpath 'me.nallar.libloader:LibLoaderGradle:0.1-SNAPSHOT'
+		classpath 'org.minimallycorrect.modpatcher:ModPatcherGradle:0.1-SNAPSHOT'
+		classpath 'org.minimallycorrect.libloader:LibLoaderGradle:0.1-SNAPSHOT'
 	}
 }
-apply plugin: 'me.nallar.ModPatcherGradle'
-apply plugin: 'me.nallar.libloader.LibLoaderGradle'
+apply plugin: 'org.minimallycorrect.modpatcher.ModPatcherGradle'
+apply plugin: 'org.minimallycorrect.libloader.LibLoaderGradle'
 apply plugin: 'maven'
 
-group = 'me.nallar'
-archivesBaseName = 'modpatcher'
+group = 'org.minimallycorrect.modpatcher'
 
 // Extended project information
 ext.projectName = 'ModPatcher'
 ext.inceptionYear = '2014'
 ext.packaging = 'jar'
-ext.url = 'http://nallar.me/minecraft'
+ext.url = 'https://github.com/MinimallyCorrect/ModPatcher'
 ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
 ext.mcVersion = '1.11.2'
@@ -89,7 +88,7 @@ configurations {
 dependencies {
 	testCompile 'junit:junit:4.12'
 	libLoader group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
-	libLoader group: 'me.nallar', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
+	libLoader group: 'org.minimallycorrect.mixin', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
 	libLoader 'org.javassist:javassist:3.22.0-CR1'
 	provided group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
 }

@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.api;
+package org.minimallycorrect.modpatcher.api;
 
 import me.nallar.javapatcher.patcher.Patcher;
 
@@ -17,7 +17,7 @@ public class ModPatcher {
 	 * @return Name of the ModPatcher setup class
 	 */
 	public static String getSetupClass() {
-		return "me.nallar.modpatcher.api.ModPatcherSetup";
+		return "ModPatcherSetup";
 	}
 
 	/**

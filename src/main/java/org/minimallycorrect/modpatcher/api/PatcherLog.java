@@ -1,4 +1,4 @@
-package me.nallar.modpatcher.api;
+package org.minimallycorrect.modpatcher.api;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
