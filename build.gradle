@@ -16,8 +16,8 @@ buildscript {
 		}
 	}
 	configurations.all {
-		resolutionStrategy.cacheChangingModulesFor 1, 'hour'
-		resolutionStrategy.cacheDynamicVersionsFor 1, 'hour'
+		resolutionStrategy.cacheChangingModulesFor 1, 'hours'
+		resolutionStrategy.cacheDynamicVersionsFor 1, 'hours'
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
@@ -77,8 +77,8 @@ repositories {
 }
 
 configurations.all {
-	resolutionStrategy.cacheChangingModulesFor 1, 'hour'
-	resolutionStrategy.cacheDynamicVersionsFor 1, 'hour'
+	resolutionStrategy.cacheChangingModulesFor 1, 'hours'
+	resolutionStrategy.cacheDynamicVersionsFor 1, 'hours'
 }
 dependencies {
 	testCompile 'junit:junit:4.12'
