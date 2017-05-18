@@ -15,6 +15,10 @@ buildscript {
 			url = "https://repo.nallar.me/"
 		}
 	}
+	configurations.all {
+		resolutionStrategy.cacheChangingModulesFor 1, 'hour'
+		resolutionStrategy.cacheDynamicVersionsFor 1, 'hour'
+	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
 		classpath 'org.minimallycorrect.modpatcher:ModPatcherGradle:0.1-SNAPSHOT'
@@ -72,6 +76,10 @@ repositories {
 	maven { url 'https://repo.nallar.me/' }
 }
 
+configurations.all {
+	resolutionStrategy.cacheChangingModulesFor 1, 'hour'
+	resolutionStrategy.cacheDynamicVersionsFor 1, 'hour'
+}
 dependencies {
 	testCompile 'junit:junit:4.12'
 	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
