@@ -15,15 +15,12 @@ buildscript {
 			url = "https://repo.nallar.me/"
 		}
 	}
-	configurations.all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
 		classpath 'org.minimallycorrect.modpatcher:ModPatcherGradle:0.1-SNAPSHOT'
-		classpath 'org.minimallycorrect.libloader:LibLoaderGradle:0.1-SNAPSHOT'
 	}
 }
 apply plugin: 'org.minimallycorrect.modpatcher.ModPatcherGradle'
-apply plugin: 'org.minimallycorrect.libloader.LibLoaderGradle'
 apply plugin: 'maven'
 
 group = 'org.minimallycorrect.modpatcher'
@@ -67,10 +64,6 @@ modpatcher {
 	generateStubMinecraftClasses = true
 }
 
-libLoader {
-	bundleLibLoader = false
-}
-
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -79,18 +72,14 @@ repositories {
 	maven { url 'https://repo.nallar.me/' }
 }
 
-configurations {
-	all { resolutionStrategy.cacheChangingModulesFor 30, 'seconds' }
-	provided
-	compile.extendsFrom provided
-}
-
 dependencies {
 	testCompile 'junit:junit:4.12'
-	libLoader group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
-	libLoader group: 'org.minimallycorrect.mixin', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
-	libLoader 'org.javassist:javassist:3.22.0-CR1'
-	provided group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
+	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.4', changing: false
+	compile group: 'org.minimallycorrect.mixin', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
+	compile 'org.javassist:javassist:3.22.0-CR1'
+	compileOnly group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
+	compileOnly 'org.projectlombok:lombok:1.16.16'
+	testCompileOnly 'org.projectlombok:lombok:1.16.16'
 }
 
 if (System.env.GRADLE_USER_HOME) {
