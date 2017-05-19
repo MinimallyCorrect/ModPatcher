@@ -87,6 +87,10 @@ public class ModPatcherTransformer {
 
 		LaunchClassLoaderUtil.instance = classLoader;
 		ModPatcherTweaker.add();
+		classLoader.addTransformerExclusion("org.minimallycorrect.modpatcher");
+		classLoader.addTransformerExclusion("org.minimallycorrect.javatransformer");
+		classLoader.addTransformerExclusion("org.minimallycorrect.mixin");
+		classLoader.addTransformerExclusion("me.nallar.javapatcher");
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());
 		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
 		LaunchClassLoaderUtil.removeRedundantExclusions();
