@@ -231,6 +231,7 @@ public enum LaunchClassLoaderUtil {
 	public static void removeRedundantExclusions() {
 		removeRedundantExclusions(getTransformerExceptions());
 		removeRedundantExclusions(getClassLoaderExceptions());
+		getClassLoaderExceptions().removeIf(it -> it.startsWith("org.minimallycorrect.modpatcher"));
 	}
 
 	static void removeRedundantExclusions(Set<String> transformerExceptions) {
@@ -250,9 +251,5 @@ public enum LaunchClassLoaderUtil {
 	public static void releaseSrgBytes(String transformedName) {
 		cachedSrgClasses.remove(transformedName);
 		ModPatcherTransformer.pool.dropCache(transformedName, true);
-	}
-
-	public static void removeClassLoaderExclusions(String name) {
-		classLoaderExceptions.removeIf(it -> it.startsWith(name));
 	}
 }
