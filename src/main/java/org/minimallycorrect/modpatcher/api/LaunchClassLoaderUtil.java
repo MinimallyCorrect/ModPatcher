@@ -251,4 +251,8 @@ public enum LaunchClassLoaderUtil {
 		cachedSrgClasses.remove(transformedName);
 		ModPatcherTransformer.pool.dropCache(transformedName, true);
 	}
+
+	public static void removeClassLoaderExclusions(String name) {
+		classLoaderExceptions.removeIf(it -> it.startsWith(name));
+	}
 }

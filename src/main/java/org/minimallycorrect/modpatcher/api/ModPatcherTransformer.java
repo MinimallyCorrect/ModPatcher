@@ -94,7 +94,6 @@ public class ModPatcherTransformer {
 		classLoader.addTransformerExclusion("javassist");
 		classLoader.addTransformerExclusion("com.github.javaparser");
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());
-		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
 		LaunchClassLoaderUtil.removeRedundantExclusions();
 	}
 

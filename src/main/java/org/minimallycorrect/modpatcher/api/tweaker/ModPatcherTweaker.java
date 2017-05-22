@@ -39,6 +39,8 @@ public class ModPatcherTweaker implements ITweaker {
 
 	@Override
 	public void acceptOptions(List<String> list, File file, File file1, String s) {
+		LaunchClassLoaderUtil.removeClassLoaderExclusions("org.minimallycorrect.modpatcher");
+		ModPatcherTweaker2.add();
 	}
 
 	@Override
@@ -54,7 +56,6 @@ public class ModPatcherTweaker implements ITweaker {
 	@Override
 	public String[] getLaunchArguments() {
 		inject();
-		LaunchClassLoaderUtil.dumpTransformersIfEnabled();
 		return new String[0];
 	}
 }
