@@ -3,6 +3,7 @@ package org.minimallycorrect.modpatcher.api.tweaker;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.minimallycorrect.modpatcher.api.LaunchClassLoaderUtil;
 
 import java.io.*;
 import java.util.*;
@@ -15,6 +16,7 @@ public class ModPatcherTweaker implements ITweaker {
 
 	@Override
 	public void acceptOptions(List<String> list, File file, File file1, String s) {
+		LaunchClassLoaderUtil.removeRedundantExclusions();
 		ModPatcherTweaker2.add();
 	}
 
