@@ -121,26 +121,37 @@ static Encoder getEncoder() {
 	return encoder
 }
 
-static File lzma(String name) {
+project.ext.lzmaFromTo = new HashMap<File, File>()
+
+File lzma(String name) {
 	File from = new File(name)
 	File to = new File("./generated/" + from.getName() + ".lzma")
-
-	if (!to.exists() || to.lastModified() != from.lastModified()) {
-		to.getParentFile().mkdir()
-		OutputStream stream = new LzmaOutputStream(new FileOutputStream(to), getEncoder())
-		try {
-			Files.copy(from.toPath(), stream)
-		} finally {
-			stream.flush()
-			stream.close()
-		}
-		to.setLastModified(from.lastModified())
-	}
-
+	project.lzmaFromTo.put(from, to)
 	return to
 }
 
+void createLzma() {
+	for (entry in project.lzmaFromTo.entrySet()) {
+		File from = entry.getKey()
+		File to = entry.getValue()
+		if (!to.exists() || to.lastModified() != from.lastModified()) {
+			to.getParentFile().mkdir()
+			OutputStream stream = new LzmaOutputStream(new FileOutputStream(to), getEncoder())
+			try {
+				Files.copy(from.toPath(), stream)
+			} finally {
+				stream.flush()
+				stream.close()
+			}
+			to.setLastModified(from.lastModified())
+		}
+	}
+}
+
 jar {
+	doFirst {
+		createLzma()
+	}
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	from lzma(mappingsPath + 'methods.csv')
 	from lzma(mappingsPath + 'fields.csv')
