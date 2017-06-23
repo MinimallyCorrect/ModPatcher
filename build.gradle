@@ -156,7 +156,8 @@ jar {
 	from lzma(mappingsPath + 'methods.csv')
 	from lzma(mappingsPath + 'fields.csv')
 	from './generated/extendsMap.obj.lzma'
-	from './generated/minecraft_stubs.jar.lzma'
+	// TODO FIXME See LaunchClassLoaderUtil
+	// from './generated/minecraft_stubs.jar.lzma'
 }
 
 processResources {

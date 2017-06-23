@@ -132,6 +132,9 @@ public enum LaunchClassLoaderUtil {
 
 	@SneakyThrows
 	private static byte[] getStubSrgBytes(String name) {
+		return null;
+		// TODO: FIXME - ModPatcherGradle generates fully deobfed stubs instead of SRG names
+		/*
 		if (stubs == null) {
 			Path extracted = Paths.get("./libraries/minecraft_stubs.jar");
 			if (!Files.exists(extracted)) {
@@ -148,9 +151,10 @@ public enum LaunchClassLoaderUtil {
 		} catch (NoSuchFileException ignored) {
 			return null;
 		}
+		*/
 	}
 
-	public static byte[] getSrgBytes(String name, boolean allowRetransform) {
+	public static byte[] getSrgBytes(String name) {
 		final String transformedName = transformName(name);
 		name = untransformName(name);
 
@@ -162,7 +166,7 @@ public enum LaunchClassLoaderUtil {
 			PatcherLog.warn("Need to retransform " + transformedName + " to get SRG bytes", new Throwable());
 		}
 		byte[] cached = cachedSrgClasses.get(transformedName);
-		if (cached != null || !allowRetransform) {
+		if (cached != null) {
 			return cached;
 		}
 		val stubBytes = getStubSrgBytes(transformedName);

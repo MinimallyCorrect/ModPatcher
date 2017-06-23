@@ -80,7 +80,7 @@ public class ClassLoaderPool extends ClassPool {
 	private class LaunchClassLoaderPath implements ClassPath {
 		@Override
 		public InputStream openClassfile(String className) throws NotFoundException {
-			val bytes = LaunchClassLoaderUtil.getSrgBytes(className, true);
+			val bytes = LaunchClassLoaderUtil.getSrgBytes(className);
 			if (bytes == null)
 				return null;
 			return new ByteArrayInputStream(bytes);
@@ -89,7 +89,7 @@ public class ClassLoaderPool extends ClassPool {
 		@SneakyThrows
 		@Override
 		public URL find(String className) {
-			val bytes = LaunchClassLoaderUtil.getSrgBytes(className, true);
+			val bytes = LaunchClassLoaderUtil.getSrgBytes(className);
 			if (bytes == null)
 				return null;
 			return new URL(null, "runtimeclass:" + className.replace(".", "/"), new Handler(bytes));
