@@ -5,6 +5,7 @@ import me.nallar.javapatcher.patcher.Patcher;
 import me.nallar.javapatcher.patcher.Patches;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.minimallycorrect.mixin.internal.ApplicationType;
 import org.minimallycorrect.mixin.internal.MixinApplicator;
 import org.minimallycorrect.modpatcher.api.tweaker.ModPatcherTweaker;
 
@@ -105,7 +106,7 @@ public class ModPatcherTransformer {
 
 		if (mixinApplicator == null) {
 			ModPatcherTransformer.mixinApplicator = mixinApplicator = new MixinApplicator();
-			mixinApplicator.setMakeAccessible(false);
+			mixinApplicator.setApplicationType(ApplicationType.FINAL_PATCH);
 			mixinApplicator.setNoMixinIsError(true);
 			mixinApplicator.setLog(PatcherLog::info);
 		}
