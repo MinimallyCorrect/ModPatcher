@@ -193,7 +193,3 @@ tasks.withType(Jar) {
 		"Implementation-Vendor": url,
 	)
 }
-
-task wrapper(type: Wrapper) {
-	gradleVersion = '3.5'
-}
