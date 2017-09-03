@@ -38,10 +38,10 @@ ext.packaging = 'jar'
 ext.url = 'https://github.com/MinimallyCorrect/ModPatcher'
 ext.description = 'Mod Patcher'
 ext.organization = 'nallar.me'
-ext.mcVersion = '1.12'
-ext.forgeVersion = "14.21.0.2340"
+ext.mcVersion = '1.12.1'
+ext.forgeVersion = "14.22.0.2467"
 ext.mappings_channel = "snapshot"
-ext.mappings_version = "20170617"
+ext.mappings_version = "20170624"
 ext.mappings = mappings_channel + '_' + mappings_version
 ext.fullForgeVersion = mcVersion + "-" + forgeVersion
 
