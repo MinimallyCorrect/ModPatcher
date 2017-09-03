@@ -169,9 +169,6 @@ processResources {
 	filesMatching("mcmod.info") {
 		expand 'version': project.versionWithBuildNumber, 'mcversion': project.minecraft.version, 'name': project.projectName
 	}
-	filesMatching("modpatcher.version") {
-		expand 'version': project.versionWithBuildNumber
-	}
 }
 
 tasks.withType(JavaCompile) {
