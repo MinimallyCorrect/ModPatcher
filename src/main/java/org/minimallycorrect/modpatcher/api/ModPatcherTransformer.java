@@ -13,13 +13,13 @@ import java.io.*;
 import java.nio.file.*;
 
 public class ModPatcherTransformer {
-	public static final ClassLoaderPool pool;
 	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
-	private static final Patcher patcher;
 	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
 	private static final String DUMP_PROPERTY_NAME = "nallar.ModPatcher.dump";
 	private static final boolean DUMP = !System.getProperty(DUMP_PROPERTY_NAME, "").isEmpty();
 	private static boolean classLoaderInitialised = false;
+	private static boolean haveTransformedClasses;
+	private static Patcher patcher;
 	private static MixinApplicator mixinApplicator;
 
 	static {
@@ -28,12 +28,10 @@ public class ModPatcherTransformer {
 		checkForMultipleClassLoads();
 
 		try {
-			patcher = new Patcher(pool = new ClassLoaderPool(), Patches.class, new MCPMappings());
-
 			// TODO - issue #2. Determine layout/config file structure
-			recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY), patcher);
+			recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY));
 		} catch (Throwable t) {
-			throw logError("Failed to create Patcher", t);
+			throw logError("Failed to load patches from " + MOD_PATCHES_DIRECTORY, t);
 		}
 	}
 
@@ -53,11 +51,17 @@ public class ModPatcherTransformer {
 	}
 
 	public static Patcher getPatcher() {
+		if (patcher == null) {
+			if (haveTransformedClasses)
+				throw new IllegalStateException("Too late to initialise patcher");
+			patcher = new Patcher(new ClassLoaderPool(), Patches.class, new MCPMappings());
+		}
+
 		return patcher;
 	}
 
 	@SuppressWarnings("deprecation")
-	private static void recursivelyAddXmlFiles(File directory, Patcher patcher) {
+	private static void recursivelyAddXmlFiles(File directory) {
 		File[] files = directory.listFiles();
 		if (files == null)
 			return;
@@ -65,11 +69,11 @@ public class ModPatcherTransformer {
 		try {
 			for (File f : files) {
 				if (f.isDirectory()) {
-					recursivelyAddXmlFiles(f, patcher);
+					recursivelyAddXmlFiles(f);
 				} else if (f.getName().endsWith(".xml")) {
-					patcher.readPatchesFromXmlInputStream(new FileInputStream(f));
+					getPatcher().readPatchesFromXmlInputStream(new FileInputStream(f));
 				} else if (f.getName().endsWith(".json")) {
-					patcher.readPatchesFromJsonInputStream(new FileInputStream(f));
+					getPatcher().readPatchesFromJsonInputStream(new FileInputStream(f));
 				}
 			}
 		} catch (IOException e) {
@@ -105,6 +109,8 @@ public class ModPatcherTransformer {
 		MixinApplicator mixinApplicator = ModPatcherTransformer.mixinApplicator;
 
 		if (mixinApplicator == null) {
+			if (haveTransformedClasses)
+				throw new IllegalStateException("Too late to initialise mixin applicator");
 			ModPatcherTransformer.mixinApplicator = mixinApplicator = new MixinApplicator();
 			mixinApplicator.setApplicationType(ApplicationType.FINAL_PATCH);
 			mixinApplicator.setNoMixinIsError(true);
@@ -116,7 +122,6 @@ public class ModPatcherTransformer {
 
 	private static class ClassTransformer implements IClassTransformer {
 		static IClassTransformer INSTANCE = new ClassTransformer();
-		private boolean init;
 
 		private static void dumpIfEnabled(String name, byte[] data) {
 			if (!DUMP || !name.contains("net.minecraft"))
@@ -133,26 +138,25 @@ public class ModPatcherTransformer {
 
 		@Override
 		public byte[] transform(String name, String transformedName, byte[] bytes) {
-			if (!init) {
-				init = true;
-				patcher.logDebugInfo();
-			}
+			haveTransformedClasses = true;
 
 			dumpIfEnabled(transformedName + "_unpatched", bytes);
 
 			final byte[] originalBytes = bytes;
 			val mixinApplicator = ModPatcherTransformer.mixinApplicator;
-			if (mixinApplicator != null) {
+			if (mixinApplicator != null)
 				bytes = mixinApplicator.getMixinTransformer().transformClass(() -> originalBytes, transformedName).get();
-			}
 
-			LaunchClassLoaderUtil.cacheSrgBytes(transformedName, bytes);
-			try {
-				bytes = patcher.patch(transformedName, bytes);
-			} catch (Throwable t) {
-				PatcherLog.error("Failed to patch " + transformedName, t);
-			} finally {
-				LaunchClassLoaderUtil.releaseSrgBytes(transformedName);
+			val patcher = ModPatcherTransformer.patcher;
+			if (patcher != null) {
+				LaunchClassLoaderUtil.cacheSrgBytes(transformedName, bytes);
+				try {
+					bytes = patcher.patch(transformedName, bytes);
+				} catch (Throwable t) {
+					PatcherLog.error("Failed to patch " + transformedName, t);
+				} finally {
+					LaunchClassLoaderUtil.releaseSrgBytes(transformedName);
+				}
 			}
 
 			if (originalBytes != bytes)

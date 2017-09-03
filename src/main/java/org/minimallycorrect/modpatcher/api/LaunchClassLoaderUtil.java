@@ -1,6 +1,5 @@
 package org.minimallycorrect.modpatcher.api;
 
-import LZMA.LzmaInputStream;
 import lombok.SneakyThrows;
 import lombok.val;
 import net.minecraft.launchwrapper.IClassNameTransformer;
@@ -10,7 +9,6 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import java.io.*;
 import java.lang.reflect.*;
 import java.nio.file.FileSystem;
-import java.nio.file.*;
 import java.util.*;
 
 public enum LaunchClassLoaderUtil {
@@ -192,7 +190,7 @@ public enum LaunchClassLoaderUtil {
 
 		byte[] old = cachedSrgClasses.put(transformedName, bytes);
 		if (old != null && !Arrays.equals(bytes, old)) {
-			ModPatcherTransformer.pool.dropCache(transformedName, false);
+			((ClassLoaderPool) ModPatcherTransformer.getPatcher().getClassPool()).dropCache(transformedName, false);
 			if (shouldWarnInconsistentTransformation())
 				PatcherLog.warn(null, new Error("Inconsistent transformation results. Tried to cache different bytes for class " + transformedName + " to previous result after transformation."));
 		}
@@ -254,6 +252,6 @@ public enum LaunchClassLoaderUtil {
 
 	public static void releaseSrgBytes(String transformedName) {
 		cachedSrgClasses.remove(transformedName);
-		ModPatcherTransformer.pool.dropCache(transformedName, true);
+		((ClassLoaderPool) ModPatcherTransformer.getPatcher().getClassPool()).dropCache(transformedName, true);
 	}
 }
