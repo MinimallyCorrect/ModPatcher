@@ -87,7 +87,7 @@ if (System.getenv("GRADLE_NO_CACHE_CHANGING") != null) {
 
 dependencies {
 	testCompile 'junit:junit:4.12'
-	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.7', changing: false
+	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.8', changing: false
 	compile group: 'org.minimallycorrect.mixin', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
 	compile 'org.javassist:javassist:3.22.0-CR1'
 	compileOnly group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
