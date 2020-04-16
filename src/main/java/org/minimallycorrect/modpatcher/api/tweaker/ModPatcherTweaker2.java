@@ -1,15 +1,16 @@
 package org.minimallycorrect.modpatcher.api.tweaker;
 
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+
 import org.minimallycorrect.modpatcher.api.LaunchClassLoaderUtil;
 import org.minimallycorrect.modpatcher.api.ModPatcherTransformer;
 import org.minimallycorrect.modpatcher.api.PatcherLog;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import net.minecraft.launchwrapper.ITweaker;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 
 public class ModPatcherTweaker2 implements ITweaker {
 	@SuppressWarnings("unchecked")
@@ -35,12 +36,10 @@ public class ModPatcherTweaker2 implements ITweaker {
 	}
 
 	@Override
-	public void acceptOptions(List<String> list, File file, File file1, String s) {
-	}
+	public void acceptOptions(List<String> list, File file, File file1, String s) {}
 
 	@Override
-	public void injectIntoClassLoader(LaunchClassLoader classLoader) {
-	}
+	public void injectIntoClassLoader(LaunchClassLoader classLoader) {}
 
 	@Override
 	public String getLaunchTarget() {

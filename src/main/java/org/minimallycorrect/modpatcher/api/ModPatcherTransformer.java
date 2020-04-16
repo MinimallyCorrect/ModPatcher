@@ -1,38 +1,29 @@
 package org.minimallycorrect.modpatcher.api;
 
+import java.io.*;
+import java.nio.file.*;
+
 import lombok.val;
-import me.nallar.javapatcher.patcher.Patcher;
-import me.nallar.javapatcher.patcher.Patches;
-import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.launchwrapper.LaunchClassLoader;
+
 import org.minimallycorrect.mixin.internal.ApplicationType;
 import org.minimallycorrect.mixin.internal.MixinApplicator;
 import org.minimallycorrect.modpatcher.api.tweaker.ModPatcherTweaker;
 
-import java.io.*;
-import java.nio.file.*;
+import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 
 public class ModPatcherTransformer {
-	private static final String MOD_PATCHES_DIRECTORY = "./ModPatches/";
-	private static final String ALREADY_LOADED_PROPERTY_NAME = "nallar.ModPatcher.alreadyLoaded";
-	private static final String DUMP_PROPERTY_NAME = "nallar.ModPatcher.dump";
+	private static final String ALREADY_LOADED_PROPERTY_NAME = "ModPatcher.alreadyLoaded";
+	private static final String DUMP_PROPERTY_NAME = "ModPatcher.dump";
 	private static final boolean DUMP = !System.getProperty(DUMP_PROPERTY_NAME, "").isEmpty();
 	private static boolean classLoaderInitialised = false;
 	private static boolean haveTransformedClasses;
-	private static Patcher patcher;
 	private static MixinApplicator mixinApplicator;
 
 	static {
 		PatcherLog.info("ModPatcher running under classloader " + ModPatcherTransformer.class.getClassLoader().getClass().getName());
 
 		checkForMultipleClassLoads();
-
-		try {
-			// TODO - issue #2. Determine layout/config file structure
-			recursivelyAddXmlFiles(new File(MOD_PATCHES_DIRECTORY));
-		} catch (Throwable t) {
-			throw logError("Failed to load patches from " + MOD_PATCHES_DIRECTORY, t);
-		}
 	}
 
 	private static Error logError(String message, Throwable t) {
@@ -47,37 +38,6 @@ public class ModPatcherTransformer {
 				throw e;
 		} else {
 			System.setProperty(ALREADY_LOADED_PROPERTY_NAME, "true");
-		}
-	}
-
-	public static Patcher getPatcher() {
-		if (patcher == null) {
-			if (haveTransformedClasses)
-				throw new IllegalStateException("Too late to initialise patcher");
-			patcher = new Patcher(new ClassLoaderPool(), Patches.class, new MCPMappings());
-		}
-
-		return patcher;
-	}
-
-	@SuppressWarnings("deprecation")
-	private static void recursivelyAddXmlFiles(File directory) {
-		File[] files = directory.listFiles();
-		if (files == null)
-			return;
-
-		try {
-			for (File f : files) {
-				if (f.isDirectory()) {
-					recursivelyAddXmlFiles(f);
-				} else if (f.getName().endsWith(".xml")) {
-					getPatcher().readPatchesFromXmlInputStream(new FileInputStream(f));
-				} else if (f.getName().endsWith(".json")) {
-					getPatcher().readPatchesFromJsonInputStream(new FileInputStream(f));
-				}
-			}
-		} catch (IOException e) {
-			PatcherLog.warn("Failed to load patch", e);
 		}
 	}
 
@@ -99,10 +59,6 @@ public class ModPatcherTransformer {
 		classLoader.addTransformerExclusion("javassist");
 		classLoader.addTransformerExclusion("com.github.javaparser");
 		LaunchClassLoaderUtil.addTransformer(ModPatcherTransformer.getInstance());
-	}
-
-	static String getDefaultPatchesDirectory() {
-		return MOD_PATCHES_DIRECTORY;
 	}
 
 	static MixinApplicator getMixinApplicator() {
@@ -146,18 +102,6 @@ public class ModPatcherTransformer {
 			val mixinApplicator = ModPatcherTransformer.mixinApplicator;
 			if (mixinApplicator != null)
 				bytes = mixinApplicator.getMixinTransformer().transformClass(() -> originalBytes, transformedName).get();
-
-			val patcher = ModPatcherTransformer.patcher;
-			if (patcher != null) {
-				LaunchClassLoaderUtil.cacheSrgBytes(transformedName, bytes);
-				try {
-					bytes = patcher.patch(transformedName, bytes);
-				} catch (Throwable t) {
-					PatcherLog.error("Failed to patch " + transformedName, t);
-				} finally {
-					LaunchClassLoaderUtil.releaseSrgBytes(transformedName);
-				}
-			}
 
 			if (originalBytes != bytes)
 				dumpIfEnabled(transformedName, bytes);

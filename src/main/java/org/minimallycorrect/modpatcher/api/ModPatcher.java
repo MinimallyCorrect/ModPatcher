@@ -1,8 +1,5 @@
 package org.minimallycorrect.modpatcher.api;
 
-import me.nallar.javapatcher.patcher.Patcher;
-
-import java.io.*;
 import java.nio.file.*;
 
 /**
@@ -21,37 +18,7 @@ public class ModPatcher {
 	}
 
 	/**
-	 * Load JavaPatcher patches
-	 *
-	 * @param inputStream stream to load patches from
-	 */
-	public static void loadPatches(InputStream inputStream) {
-		ModPatcherTransformer.getPatcher().loadPatches(inputStream);
-	}
-
-	/**
-	 * Load JavaPatcher patches
-	 *
-	 * @param patches String to load patches from
-	 */
-	public static void loadPatches(String patches) {
-		ModPatcherTransformer.getPatcher().loadPatches(patches);
-	}
-
-	/**
-	 * Gets the JavaPatcher Patcher instance
-	 *
-	 * @return the Patcher
-	 * @deprecated Use specific methods such as loadPatches(InputStream)
-	 */
-	@Deprecated
-	public static Patcher getPatcher() {
-		return ModPatcherTransformer.getPatcher();
-	}
-
-	/**
-	 * Loads mixins from the given package.
-	 * The package must have a package-info.java with @Mixin annotation
+	 * Loads mixins from the given package. The package must have a package-info.java with @Mixin annotation
 	 *
 	 * @param mixinPackage Package to load mixins from
 	 */
@@ -75,14 +42,5 @@ public class ModPatcher {
 	 */
 	public static void loadMixins(Path path, String packageName) {
 		ModPatcherTransformer.getMixinApplicator().addSource(path, packageName);
-	}
-
-	/**
-	 * Gets the default patches directory. Any patches in this directory are loaded by ModPatcher on startup.
-	 *
-	 * @return default patches directory
-	 */
-	public static String getDefaultPatchesDirectory() {
-		return ModPatcherTransformer.getDefaultPatchesDirectory();
 	}
 }

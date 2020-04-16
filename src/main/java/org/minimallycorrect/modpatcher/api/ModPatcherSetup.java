@@ -1,23 +1,35 @@
 package org.minimallycorrect.modpatcher.api;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.fml.relauncher.IFMLCallHook;
+import org.minimallycorrect.modpatcher.api.tweaker.ModPatcherTweaker;
 
-import java.util.*;
+public class ModPatcherSetup {
+	public static void initialise() {
+		if (tryLaunchTweakerInit()) {
+			return;
+		}
 
-/**
- * Set as the setup class for your CoreMod to set up ModPatcher
- * <p>
- * <pre><code>@Override public String getSetupClass() { return ModPatcher.getSetupClass(); }</code></pre>
- */
-public class ModPatcherSetup implements IFMLCallHook {
-	@Override
-	public void injectData(Map<String, Object> data) {
-		ModPatcherTransformer.initialiseClassLoader((LaunchClassLoader) ModPatcherSetup.class.getClassLoader());
+		// TODO: more hooks
+
+		System.err.println("Can't initialise ModPatcher, dumping state.");
+		System.getenv().forEach((k, v) -> {
+			System.err.println(k + "\t=\t" + v);
+		});
+		System.getProperties().forEach((k, v) -> {
+			System.err.println(k + "\t=\t" + v);
+		});
+		throw new Error("Couldn't initialise ModPatcher");
 	}
 
-	@Override
-	public Void call() throws Exception {
-		return null;
+	private static boolean tryLaunchTweakerInit() {
+		try {
+			ModPatcherTweaker.add();
+		} catch (Throwable t) {
+			System.err.println("Failed to add tweaker");
+			t.printStackTrace();
+			return false;
+		}
+
+		System.out.println("Adding tweaker seems successful, init will be delayed until tweaker runs.");
+		return true;
 	}
 }

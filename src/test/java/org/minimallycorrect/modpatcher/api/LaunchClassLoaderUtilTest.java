@@ -1,8 +1,8 @@
 package org.minimallycorrect.modpatcher.api;
 
-import org.junit.Test;
-
 import java.util.*;
+
+import org.junit.Test;
 
 public class LaunchClassLoaderUtilTest {
 	@Test

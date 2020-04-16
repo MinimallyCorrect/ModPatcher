@@ -1,192 +1,51 @@
-import lzma.sdk.lzma.Encoder
-import lzma.streams.LzmaOutputStream
-
-import java.nio.file.Files
-
 buildscript {
 	repositories {
 		jcenter()
-		maven {
-			name = "forge"
-			url = "http://files.minecraftforge.net/maven"
-		}
-		maven {
-			name = "nallar"
-			url = "https://repo.nallar.me/"
-		}
-	}
-	if (System.getenv("GRADLE_NO_CACHE_CHANGING") != null) {
-		configurations.all {
-			resolutionStrategy.cacheChangingModulesFor 1, 'seconds'
-			resolutionStrategy.cacheDynamicVersionsFor 1, 'seconds'
-		}
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-		classpath 'org.minimallycorrect.modpatcher:ModPatcherGradle:0.1-SNAPSHOT'
+		//classpath 'org.minimallycorrect.modpatcher:ModPatcherGradle:0.2-SNAPSHOT'
+		dependencies { classpath 'org.minimallycorrect.gradle:DefaultsPlugin:0.0.51' }
 	}
 }
-apply plugin: 'org.minimallycorrect.modpatcher.ModPatcherGradle'
-apply plugin: 'maven'
+plugins {
+	id 'java'
+	id 'java-library'
+	id 'maven'
+}
+apply plugin: 'org.minimallycorrect.gradle.DefaultsPlugin'
 
 group = 'org.minimallycorrect.modpatcher'
 
-// Extended project information
-ext.projectName = 'ModPatcher'
-ext.inceptionYear = '2014'
-ext.packaging = 'jar'
-ext.url = 'https://github.com/MinimallyCorrect/ModPatcher'
-ext.description = 'Mod Patcher'
-ext.organization = 'nallar.me'
-ext.mcVersion = '1.12'
-ext.forgeVersion = "14.21.0.2340"
-ext.mappings_channel = "snapshot"
-ext.mappings_version = "20170617"
-ext.mappings = mappings_channel + '_' + mappings_version
-ext.fullForgeVersion = mcVersion + "-" + forgeVersion
-
-// ci information
-ext.buildNumber = System.getenv("BUILD_NUMBER") ?: 0
-ext.ciSystem = System.getenv("JENKINS_URL") ? 'Jenkins' : 'unknown'
-ext.commit = System.getenv("GIT_COMMIT") ?: 'unknown'
-
-// version information
-version = mcVersion + '-SNAPSHOT'
-
-ext.versionWithBuildNumber = project.buildNumber != 0 ? project.version.replace("-SNAPSHOT", "") + "." + project.buildNumber : project.version
-
-minecraft {
-	version = fullForgeVersion
-	mappings = project.mappings
-
-	replace "@MOD_NAME@", project.name
-	replace "@MOD_VERSION@", project.versionWithBuildNumber
-	replace "@MC_VERSION@", version
-}
-
-modpatcher {
-	extractGeneratedSources = true
-	generateInheritanceHierarchy = true
-	generateStubMinecraftClasses = true
-}
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 repositories {
-	jcenter()
-	maven { url 'https://repo.nallar.me/' }
-}
-
-if (System.getenv("GRADLE_NO_CACHE_CHANGING") != null) {
-	configurations.all {
-		resolutionStrategy.cacheChangingModulesFor 1, 'seconds'
-		resolutionStrategy.cacheDynamicVersionsFor 1, 'seconds'
+	maven {
+		url 'https://files.minecraftforge.net/maven/'
+		content {
+			includeGroupByRegex "net\\.minecraftforge\\..*"
+		}
 	}
-}
-
-dependencies {
-	testCompile 'junit:junit:4.12'
-	compile group: 'me.nallar', name: 'JavaPatcher', version: '1.8', changing: false
-	compile group: 'org.minimallycorrect.mixin', name: 'Mixin', version: '1.0-SNAPSHOT', changing: true
-	compile 'org.javassist:javassist:3.22.0-CR1'
-	compileOnly group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
-	compileOnly 'org.projectlombok:lombok:1.16.16'
-	testCompileOnly 'org.projectlombok:lombok:1.16.16'
-}
-
-if (System.env.GRADLE_USER_HOME) {
-	ext.homeDir = System.env.GRADLE_USER_HOME + '/'
-} else {
-	ext.homeDir = System.properties['user.home'] + '/.gradle/'
-}
-ext.mappingsPath = homeDir + 'caches/minecraft/de/oceanlabs/mcp/mcp_' + mappings_channel + '/' + mappings_version + '/'
-
-jar.doFirst {
-	if (
-	!file(mappingsPath + 'fields.csv').exists() ||
-		!file(mappingsPath + 'methods.csv').exists() ||
-		!file('./generated/extendsMap.obj.lzma').exists() ||
-		!file('./generated/minecraft_stubs.jar.lzma').exists()
-	)
-		throw new Error("Can't find mappings at $mappingsPath and/or $srgPath and/or $altSrgPath and/or extendsMap")
-}
-
-static Encoder getEncoder() {
-	Encoder encoder = new Encoder()
-	encoder.setDictionarySize(1 << 23)
-	encoder.setEndMarkerMode(true)
-	encoder.setMatchFinder(Encoder.EMatchFinderTypeBT4)
-	encoder.setNumFastBytes(0x20)
-	return encoder
-}
-
-project.ext.lzmaFromTo = new HashMap<File, File>()
-
-File lzma(String name) {
-	File from = new File(name)
-	File to = new File("./generated/" + from.getName() + ".lzma")
-	project.lzmaFromTo.put(from, to)
-	return to
-}
-
-void createLzma() {
-	for (entry in project.lzmaFromTo.entrySet()) {
-		File from = entry.getKey()
-		File to = entry.getValue()
-		if (!to.exists() || to.lastModified() != from.lastModified()) {
-			to.getParentFile().mkdir()
-			OutputStream stream = new LzmaOutputStream(new FileOutputStream(to), getEncoder())
-			try {
-				Files.copy(from.toPath(), stream)
-			} finally {
-				stream.flush()
-				stream.close()
-			}
-			to.setLastModified(from.lastModified())
+	maven {
+		url 'https://libraries.minecraft.net/'
+		content {
+			includeGroup "net.minecraft"
+			includeGroupByRegex "net\\.minecraft\\..*"
+			includeGroupByRegex "com\\.mojang\\..*"
 		}
 	}
 }
 
+minimallyCorrectDefaults {
+	description = "Applies Mixin-style monkey patches to .java source or compiled .class files"
+	labels = ["minecraft-mod", "java", "minecraft"]
+	configureProject(project)
+}
+
+dependencies {
+	testImplementation 'junit:junit:4.12'
+	implementation 'org.minimallycorrect.mixin:Mixin:0.0.3'
+	compileOnly group: 'net.minecraft', name: 'launchwrapper', version: '1.3'
+	compileOnly group: 'me.nallar', name: 'CachingClassLoader', version: '0.1-SNAPSHOT', changing: true
+}
+
 jar {
-	doFirst {
-		createLzma()
-	}
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	from lzma(mappingsPath + 'methods.csv')
-	from lzma(mappingsPath + 'fields.csv')
-	from './generated/extendsMap.obj.lzma'
-	// TODO FIXME See LaunchClassLoaderUtil
-	// from './generated/minecraft_stubs.jar.lzma'
-}
-
-processResources {
-	// this will ensure that this task is redone when the versions change.
-	inputs.property "version", project.versionWithBuildNumber
-	inputs.property "mcversion", project.minecraft.version
-	println("Determined ModPatcher version: " + project.versionWithBuildNumber)
-
-	filesMatching("mcmod.info") {
-		expand 'version': project.versionWithBuildNumber, 'mcversion': project.minecraft.version, 'name': project.projectName
-	}
-}
-
-tasks.withType(JavaCompile) {
-	sourceCompatibility = 8
-	targetCompatibility = 8
-	options.with {
-		encoding = 'UTF-8'
-		compilerArgs << "-Xlint:all" << "-Xlint:-classfile" << "-Xlint:-processing"
-	}
-}
-
-tasks.withType(Jar) {
-	baseName = project.name
-	manifest.mainAttributes(
-		"Built-By": System.properties['user.name'],
-		"Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
-		"Implementation-Title": name,
-		"Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
-		"Implementation-Vendor": url,
-	)
 }
